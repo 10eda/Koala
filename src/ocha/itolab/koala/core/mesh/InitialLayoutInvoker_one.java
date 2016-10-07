@@ -43,16 +43,16 @@ public class InitialLayoutInvoker_one {
                 Process p = runtime.exec(command);
                 int ret = p.waitFor();
                 p.destroy();
-        } catch(Exception e) {
+        	} catch(Exception e) {
                 e.printStackTrace();
-        }
+        	}
         }
         
         if(method == LINLOG)
             LinLogLayout.exec(edgelist, nodelist, null);
         if(method == READGML)
             GmlFileReader.read(edgelist, nodelist, (path + filename));
-         
+
         calcNodePosition();
          
         // for test

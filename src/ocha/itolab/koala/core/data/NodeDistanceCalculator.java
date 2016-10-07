@@ -184,8 +184,7 @@ public class NodeDistanceCalculator {
 			
 		boolean isConnected = g.isTwoNodeConnected(n1, n2);
 		double ret2_ = (isConnected == true) ? 0.0 : 1.0;
-		
-		
+				
 		double ret2 = 0.0;
 		int count = 0;
 		for(int i = 0; i < n1.connected.length; i++) {

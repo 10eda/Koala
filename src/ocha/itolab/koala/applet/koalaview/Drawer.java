@@ -1221,16 +1221,16 @@ public class Drawer implements GLEventListener {
 			p1[0] = v1pos[0] + vec1[0]*mergeStrength*0.5 + (v1pos[0]-p0[0])*(mergeStrength*0.5);
 			p1[1] = v1pos[1] + vec1[1]*mergeStrength*0.5 + (v1pos[1]-p0[1])*(mergeStrength*0.5);
 			p2[0] = v2pos[0] + vec2[0]*mergeStrength*0.5 + (v2pos[0]-p3[0])*(mergeStrength*0.5);
-			p2[1] = v2pos[1] + vec2[1]*mergeStrength*0.5 + (v2pos[1]-p3[1])*(mergeStrength*0.5);			
+			p2[1] = v2pos[1] + vec2[1]*mergeStrength*0.5 + (v2pos[1]-p3[1])*(mergeStrength*0.5);
 		}
-		
-		if(startBundlePos!=null || endBundlePos!=null){
+
+		//if(startBundlePos!=null || endBundlePos!=null){
 			//Kyokuritsu(p0[0],p0[1],p1[0],p1[1],p2[0],p2[1],p3[0],p3[1]);
-		}
+		//}
 		//Kyokuritsu(p0[0],p0[1],p1[0],p1[1],p2[0],p2[1],p3[0],p3[1]);
 		//System.out.println(p0[0] + ","+p1[1]);
 		
-		drawBezier(p0,p1,p2,p3,z1,z2,mesh,v1,v2);
+		drawBezier(p0,p1,p2,p3,z1,z2,mesh);
 		//drawSpline(p0,p1,p2,p3,z1,z2,mesh,v1,v2);
 		/*
 		double pt[] = new double[2];
@@ -1287,7 +1287,7 @@ public class Drawer implements GLEventListener {
 	}	
 	
 	void drawSpline(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh, Vertex v1, Vertex v2){
-		int NUM_T = 1000;
+		int NUM_T = 100;
 		double pt[] = new double[2];
 		gl2.glBegin(GL2.GL_LINE_STRIP);
 		
@@ -1352,8 +1352,8 @@ public class Drawer implements GLEventListener {
 		}
 	}
 	
-	void drawBezier(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh, Vertex v1, Vertex v2){
-		int NUM_T = 1000;
+	void drawBezier_avoiding(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh, Vertex v1, Vertex v2){
+		int NUM_T = 100;
 		double pt[] = new double[2];
 		gl2.glBegin(GL2.GL_LINE_STRIP);
 		
@@ -1390,6 +1390,42 @@ public class Drawer implements GLEventListener {
 			gl2.glVertex3d(pt[0], pt[1], z);
 		}	
 		gl2.glEnd();
+	}
+	
+	//Bezier曲線の描画
+	//p0, p3 : 始点終点
+	//p1, p2 : 制御点
+	void drawBezier(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh){
+		int NUM_T = 10;
+		double pt[] = new double[2];
+		
+
+		gl2.glEnable(GL2.GL_BLEND);
+		gl2.glBlendFunc(GL2.GL_ZERO,  GL2.GL_SRC_COLOR);
+		gl2.glBegin(GL2.GL_LINE_STRIP);
+		
+		for(int i = 0; i <= NUM_T; i++) {
+			double interval = 1.0 / (double)NUM_T;
+			double t0 = interval * (double)i;
+			double t1 = 1.0 - t0;
+
+			for(int j = 0; j < 2; j++) 
+				pt[j] = p0[j] * t1 * t1 * t1 + p1[j] * 3.0 * t0 * t1 * t1
+				+ p2[j] * 3.0 * t0 * t0 * t1 + p3[j] * t0 * t0 * t0;
+
+			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
+			double t = 0.25+t0/2.0;
+			//gl2.glColor3d(t0,0,1.0-t0);
+			gl2.glColor4d(t0*0.7+0.3,0.3,1.0-t0*0.7,0.8);
+			//gl2.glColor4d(0.25 + t0*0.5, 0.25 + t0*0.5,0.25 + t0*0.5 , 1.0-t0);
+			//gl2.glColor3d(angle/2,angle/2,angle/2);
+			int x = (int)((pt[0]+1)/2.0 * mesh.mapSize);
+			int y = (int)((pt[1]+1)/2.0 * mesh.mapSize);
+			
+			gl2.glVertex3d(pt[0], pt[1], z);
+		}	
+		gl2.glEnd();
+		gl2.glDisable(GL2.GL_BLEND);
 	}
 	
 	/*t0.1ごとに曲率半径を求める*/
@@ -1464,8 +1500,9 @@ public class Drawer implements GLEventListener {
 		p2[1] = p2[1] + rotation*para*disX;
 		
 
-		//drawBezier(p0,p1,p2,p3,z1,z2,graph.mesh,v1,v2);
+		drawBezier(p0,p1,p2,p3,z1,z2,graph.mesh);
 
+		/*
 		double pt[] = new double[2];
 		gl2.glBegin(GL2.GL_LINE_STRIP);
 		//gl2.glColor3d(0.3,0.7,0.3);
@@ -1489,6 +1526,7 @@ public class Drawer implements GLEventListener {
 
 		}
 		gl2.glEnd();
+		*/
 		
 
 	}	

@@ -14,10 +14,12 @@ import ocha.itolab.koala.core.forcedirected.*;
 public class MeshGenerator {
 	static int CLUSTERING_ONE = 1;
 	static int CLUSTERING_TWO = 2;
+	static int CLUSTERING_SET = 3;
 	static int CLUSTERING_BYMYSELF = 1;
 	static int CLUSTERING_EXTERNAL = 2;
-	static int clusteringMode = 1;
+	
 	static int mode=CLUSTERING_ONE;
+	static int clusteringMode = CLUSTERING_BYMYSELF;
 
 	static double clusteringThreshold = 1.1;
 	static int clusteringMaxIteration = 50;
@@ -40,6 +42,8 @@ public class MeshGenerator {
 				clusterVertices_one(m, g);
 			}else if(mode==CLUSTERING_TWO){
 				clusterVertices(m, g);
+			}else if(mode==CLUSTERING_SET){
+				//clusterVertices_set(m,g);
 			}
 		}
 
@@ -56,6 +60,8 @@ public class MeshGenerator {
 		if(mode==CLUSTERING_ONE){
 			InitialLayoutInvoker_one.exec(g, m);
 		}else if(mode==CLUSTERING_TWO){
+			InitialLayoutInvoker.exec(g, m);
+		}else if(mode==CLUSTERING_SET){
 			InitialLayoutInvoker.exec(g, m);
 		}
 

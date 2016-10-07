@@ -826,6 +826,10 @@ public class Graph {
 		double cos = (vec1[0]*vec2[0]+vec1[1]*vec2[1])/
 				Math.sqrt((vec1[0]*vec1[0]+vec1[1]*vec1[1])*(vec2[0]*vec2[0]+vec2[1]*vec2[1]));
 		cos = 0.5 + cos*0.5;
+		
+		if(cos<0.95)
+			return 0;
+		
 
 		double vec[] = new double[2];
 		vec[0] = vec1[0]-vec2[0];
@@ -845,12 +849,16 @@ public class Graph {
 		vec[1] = vec1[1] + vec2[1];
 		
 		double cos = (vec1[0]*vec2[0]+vec1[1]*vec2[1])/
-				Math.sqrt((vec1[0]*vec1[0]+vec1[1]*vec1[1])*(vec2[0]*vec2[0]+vec2[1]*vec2[1]));
-		//System.out.println("cos:"+cos);
-		if(cos<0.60)
+				(Math.sqrt(vec1[0]*vec1[0]+vec1[1]*vec1[1])*Math.sqrt(vec2[0]*vec2[0]+vec2[1]*vec2[1]));
+		System.out.println("cos:"+cos);
+		
+		if(cos<0.50){
 			return 0.0;
-		if(cos>1.0)
+		}
+		if(cos>1.0){
 			return 0.0;
+		}
+	
 
 		double cos1 = (vec1[0]*vec[0]+vec1[1]*vec[1])/
 				Math.sqrt((vec1[0]*vec1[0]+vec1[1]*vec1[1])*(vec[0]*vec[0]+vec[1]*vec[1]));
@@ -879,7 +887,7 @@ public class Graph {
 
 		edgeConfluenceThreshold=ratio;
 	}
-
+	
 	public double VertexEv_delete(double newRate,int num){
 		Vertex vertex = mesh.getVertices().get(num);
 		ArrayList<Bundle> bundles = vertex.getOrder();
