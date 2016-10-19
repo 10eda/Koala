@@ -50,6 +50,7 @@ public class VectorParettePanel extends JPanel {
 	public static Color calcColor(int id, int num) {
 		float hue = (float)id / (float)num;
 		Color color = Color.getHSBColor(hue, 1.0f, 1.0f);
+		//return new Color(0,0,0);
 		return color;
 	}
 }

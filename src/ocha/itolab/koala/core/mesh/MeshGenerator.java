@@ -34,7 +34,7 @@ public class MeshGenerator {
 			/*
 			if(g.clustersizeRatio>g.clustersizeRatio2)
 				mode=CLUSTERING_ONE;
-				*/
+			*/
 			// Generate & cluster vertices
 			generateVertices(m, g);
 			generateVerticesLarge(m,g);
@@ -308,6 +308,8 @@ public class MeshGenerator {
 		for(int i = 0; i < mesh.getNumVertices(); i++) {
 			Vertex v = mesh.getVertex(i);
 			v.dissim = new double[mesh.getNumVertices()];
+			v.dissim_connected = new double[mesh.getNumVertices()];
+			v.dissim_connecting = new double[mesh.getNumVertices()];
 		}
 
 		// for each pair of the vertices
@@ -353,7 +355,8 @@ public class MeshGenerator {
 
 
 				// for each pair of the nodes belonging to the two vertices
-				int count = 0;
+				int count_connecting = 0;
+				int count_connected = 0;
 				for(int ii = 0; ii < v1.nodes.size(); ii++) {
 					Node n1 = (Node)v1.nodes.get(ii);
 					for(int jj = 0; jj < v2.nodes.size(); jj++) {
@@ -362,13 +365,13 @@ public class MeshGenerator {
 						//count++;
 						/*’Ç‰Á*/
 						if(graph.isNodeConnected1to2(n1, n2))
-							count++;
+							count_connecting++;
 						if(graph.isNodeConnected1to2(n2, n1))
-							count++;
+							count_connected++;
 						/*‚±‚±‚Ü‚Å*/
 					}
 				}
-				double dis2 = 1.0 / (double)(1 + count);
+				double dis2 = 1.0 / (double)(1 + count_connecting+count_connected);
 
 				//double dis = graph.distanceRatio * dis1 + (1.0 - graph.distanceRatio) * dis2;
 				//double dis = dis2;
@@ -376,6 +379,8 @@ public class MeshGenerator {
 				//double dis = (dis1+dis2)/2.0;
 				dis = dis2;
 				v1.dissim[j] = v2.dissim[i] = dis;
+				v1.dissim_connected[j] = v2.dissim_connecting[i] = 1.0 / (double)(1+count_connected);
+				v1.dissim_connecting[j] = v2.dissim_connected[i] = 1.0 / (double)(1+count_connecting);
 				//if(dis!=1)
 				//System.out.println("dis : "+dis);
 
