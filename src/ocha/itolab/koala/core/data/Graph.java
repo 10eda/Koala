@@ -17,7 +17,7 @@ public class Graph {
 	public int maxDegree = 0;
 
 	public ArrayList<Node> nodes = new ArrayList<Node>();
-	public ArrayList<Edge> edges = new ArrayList<Edge>();	
+	public ArrayList<Edge> edges = new ArrayList<Edge>();
 	HashMap edgemap; 
 	public Mesh mesh = null;
 
@@ -819,6 +819,7 @@ public class Graph {
 	}
 
 	//BundleEv : 合流させるべきかの評価。戻り値:0~1
+	//角度とクラスタ間の距離で算出
 	public double BundleEv(double vec1[], double vec2[]){
 
 
@@ -843,6 +844,8 @@ public class Graph {
 		//return (cos-dis*2);
 	}
 
+	//BundleEv_ : 合流させるべきかの評価。戻り値:0~1
+	//角度である程度選別した後合流できる長さを算出する(発表で使ってるやつ)
 	public double BundleEv_(double vec1[], double vec2[]){
 		double vec[] = new double[2];
 		vec[0] = vec1[0] + vec2[0];
@@ -850,7 +853,8 @@ public class Graph {
 		
 		double cos = (vec1[0]*vec2[0]+vec1[1]*vec2[1])/
 				(Math.sqrt(vec1[0]*vec1[0]+vec1[1]*vec1[1])*Math.sqrt(vec2[0]*vec2[0]+vec2[1]*vec2[1]));
-		System.out.println("cos:"+cos);
+		
+		//System.out.println("cos:"+cos);
 		
 		if(cos<0.50){
 			return 0.0;

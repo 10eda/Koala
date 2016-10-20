@@ -452,6 +452,10 @@ public class Drawer implements GLEventListener {
 		if(graph == null) return;
 		if(graph.mesh == null) return;
 		
+		int count_converge = 0;
+		int count_interactive = 0;
+		int count_nocurve = 0;
+		
 
 		int BundleNum = 0;
 		int notBundleNum = 0;
@@ -464,6 +468,41 @@ public class Drawer implements GLEventListener {
 			Vertex v1 = mesh.getVertex(i);
 			ArrayList<Node> nodes1 = v1.getNodes();
 			double dissim[] = v1.getDissim();
+			double SQUARE_SIZE = 0.01 / trans.getViewScaleX();
+			
+			//テスト用
+			
+			/*
+			
+			//connecting
+			if(v1.connectingPos[0]!=0 || v1.connectingPos[1]!=0){
+				gl2.glColor3d(0,0,0);
+				drawOneBarWithHeight(v1.connectingPos[0], v1.connectingPos[1], 0, SQUARE_SIZE);
+				gl2.glBegin(GL2.GL_LINE_STRIP);
+				gl2.glColor3d(0,0,1);
+				gl2.glVertex3d(v1.getPosition()[0], v1.getPosition()[1], 0);
+				gl2.glColor3d(1,0,0);
+				gl2.glVertex3d(v1.connectingPos[0], v1.connectingPos[1], 0);
+				gl2.glEnd();
+			}
+			
+			//connected
+			if(v1.connectedPos[0]!=0 || v1.connectedPos[1]!=0){
+				gl2.glColor3d(0,0,0);
+				drawOneBarWithHeight(v1.connectedPos[0], v1.connectedPos[1], 0, SQUARE_SIZE);
+				gl2.glBegin(GL2.GL_LINE_STRIP);			
+				gl2.glColor3d(1,0,0);
+				gl2.glVertex3d(v1.getPosition()[0], v1.getPosition()[1], 0);
+				gl2.glColor3d(0,0,1);
+				gl2.glVertex3d(v1.connectedPos[0], v1.connectedPos[1], 0);
+				gl2.glEnd();
+			}
+			
+			*/
+			
+			
+			// テスト用おわり
+
 
 			for(int j = 0; j < mesh.getNumVertices(); j++) { //
 				if(dissim[j] > edgeDensityThreshold) continue;
@@ -537,11 +576,15 @@ public class Drawer implements GLEventListener {
 							continue;
 						if(startBundlesList==null & endBundlesList==null){
 							notBundleNum++;
-							if(rotation!=0)
+							if(rotation!=0){
+								count_interactive++;
 								drawBundledEdges(v1, v2, n1, n2,rotation,angle); //合流しないけど双方向
-							else	
+							}else{	
+								count_nocurve++;
 								drawBundledEdges(v1, v2, n1, n2,0,angle); //合流しないし双方向じゃない
+							}
 						}else{
+							count_converge++;
 							BundleNum++;
 							drawBundledEdges_(v1, v2, n1, n2,rotation, mesh, startBundlePos,endBundlePos,angle); //合流する
 						}
@@ -554,7 +597,13 @@ public class Drawer implements GLEventListener {
 		//System.out.println("Bundle Num. : " + BundleNum);
 		//System.out.println("Not Bundle Num. : " + notBundleNum);
 		//System.out.println("per : "+ (double)BundleNum/(notBundleNum+BundleNum));
+		System.out.println("---------------------------");
+		System.out.println("converge : "+count_converge);
+		System.out.println("interactive : "+count_interactive);
+		System.out.println("nocurve : "+count_nocurve);
+		System.out.println("---------------------------");
 
+		
 	}
 
 	/**
@@ -646,9 +695,10 @@ public class Drawer implements GLEventListener {
 	
 	void drawPickedEdges() {
 		// Draw edges of the picked node
-		gl2.glColor3d(0.8, 0.6, 0.8);
+		//gl2.glColor3d(0.8, 0.6, 0.8);
 		gl2.glLineWidth(2.0f);
 		if(pickedNode != null) {
+			int NUM_T = 10;
 			double z = calcZ(pickedNode);
 
 			for(int i = 0; i < pickedNode.getNumConnectedEdge(); i++) {
@@ -657,12 +707,16 @@ public class Drawer implements GLEventListener {
 				gl2.glBegin(GL.GL_LINES);
 				if(enode[0] == pickedNode) {
 					double z2 = calcZ(enode[1]);
+					gl2.glColor3d(0,0,1);
 					gl2.glVertex3d(enode[0].getX(), enode[0].getY(), z);
+					gl2.glColor3d(1,0,0);
 					gl2.glVertex3d(enode[1].getX(), enode[1].getY(), z2);
 				}
 				else {
 					double z2 = calcZ(enode[0]);
+					gl2.glColor3d(0,0,1);
 					gl2.glVertex3d(enode[0].getX(), enode[0].getY(), z2);
+					gl2.glColor3d(1,0,0);
 					gl2.glVertex3d(enode[1].getX(), enode[1].getY(), z);
 				}
 				gl2.glEnd();
@@ -673,17 +727,21 @@ public class Drawer implements GLEventListener {
 				gl2.glBegin(GL.GL_LINES);
 				if(enode[0] == pickedNode) {
 					double z2 = calcZ(enode[1]);
+					gl2.glColor3d(0,0,1);
 					gl2.glVertex3d(enode[0].getX(), enode[0].getY(), z);
+					gl2.glColor3d(1,0,0);
 					gl2.glVertex3d(enode[1].getX(), enode[1].getY(), z2);
 				}
 				else {
 					double z2 = calcZ(enode[0]);
+					gl2.glColor3d(0,0,1);
 					gl2.glVertex3d(enode[0].getX(), enode[0].getY(), z2);
+					gl2.glColor3d(1,0,0);
 					gl2.glVertex3d(enode[1].getX(), enode[1].getY(), z);
 				}
 				gl2.glEnd();
 			}
-		}
+		}		
 		gl2.glLineWidth(1.0f);
 	}
 
@@ -1134,7 +1192,7 @@ public class Drawer implements GLEventListener {
 				&& cid1 >= 0 && colorSwitch[cid1] == false
 				&& cid2 >= 0 && colorSwitch[cid2] == false) {
 			return;
-		}
+		} 
 
 
 		double p0[] = new double[2];
@@ -1324,8 +1382,10 @@ public class Drawer implements GLEventListener {
 		for(int i = 0; i <= NUM_T*5.0/6.0; i++) {
 			double t = interval * (double)i - 1.0;
 			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
-			double col = 0.25+i/(NUM_T*2.0);
-			gl2.glColor3d(col,0.5,1.0-col);
+			//double col = 0.25+i/(NUM_T*2.0);
+			double col = (double)i*6.0/(NUM_T*5.0); 
+			gl2.glColor3d(col*0.6+0.4,0.4,1.0-col*0.6);
+			//gl2.glColor3d(col,0.5,1.0-col);
 			double x = 0;
 			double y = 0;
 			
@@ -1416,7 +1476,7 @@ public class Drawer implements GLEventListener {
 			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
 			double t = 0.25+t0/2.0;
 			//gl2.glColor3d(t0,0,1.0-t0);
-			gl2.glColor4d(t0*0.7+0.3,0.3,1.0-t0*0.7,0.8);
+			gl2.glColor4d(t0*0.6+0.4,0.4,1.0-t0*0.6,0.8);
 			//gl2.glColor4d(0.25 + t0*0.5, 0.25 + t0*0.5,0.25 + t0*0.5 , 1.0-t0);
 			//gl2.glColor3d(angle/2,angle/2,angle/2);
 			int x = (int)((pt[0]+1)/2.0 * mesh.mapSize);

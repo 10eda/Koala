@@ -34,7 +34,7 @@ public class InitialLayoutInvoker_one {
         constructEdge();
  
         
-        writeEdgeFile();
+        //writeEdgeFile();
         
         if(method == READGML){
         	try {
@@ -61,9 +61,9 @@ public class InitialLayoutInvoker_one {
      
      
     /**
-     * Construct edges
+     * Construct edges もともとのconstructEdge
      */
-    static void constructEdge() {
+    static void constructEdge_old() {
  
         // Clear
         edgelist.clear();
@@ -95,6 +95,66 @@ public class InitialLayoutInvoker_one {
                     addEdge(i, j, count_dim);
                     //addEdge(i, j, (double)count);
             }
+        }
+ 
+    }
+    
+    /**
+     * Construct edges 出るノード(id+vertexs.num)と入るノード(id+vertexs.num*2)を別につくる
+     */
+    static void constructEdge() {
+ 
+        // Clear
+        edgelist.clear();
+         
+        // for each pair of vertices
+        
+        int num_v = mesh.getNumVertices();
+        
+        for(int i = 0; i < mesh.getNumVertices(); i++) {
+            Vertex v1 = mesh.getVertex(i);
+            for(int j = (i + 1); j < mesh.getNumVertices(); j++) {
+                Vertex v2 = mesh.getVertex(j);
+             
+                int count_connecting = 0;
+                double count_dim_connecting = 0;
+                int count_connected = 0;
+                double count_dim_connected = 0;
+                ArrayList<Node> nodes1 = v1.getNodes();
+                for(int ii = 0; ii < nodes1.size(); ii++) {
+                    Node n1 = nodes1.get(ii);
+                    ArrayList<Node> nodes2 = v2.getNodes();
+                    for(int jj = 0; jj < nodes2.size(); jj++) {
+                        Node n2 = nodes2.get(jj);
+                        //if(graph.isTwoNodeConnected(n1, n2) == true){
+                        if(graph.isNodeConnected1to2(n1, n2) == true){
+                        	count_connected++;
+                        	count_dim_connected += n1.getDisSim2(jj);
+                        }
+                        //if(graph.isTwoNodeConnected(n2, n1) == true){
+                        if(graph.isNodeConnected1to2(n2, n1) == true){
+                        	count_connecting++;
+                        	count_dim_connecting += n1.getDisSim2(jj);
+                        }
+                    }
+                }
+         
+                // Add an edge
+                if(count_connected > 0)
+                	addEdge(i+num_v*2,j+num_v,count_dim_connected);
+                if(count_connecting > 0)
+                	addEdge(i+num_v,j+num_v*2,count_dim_connecting);
+            }
+        }
+        
+        for(int i = 0; i < mesh.getNumVertices(); i++) {
+            	double weight = countEdgeWeight(i+num_v);
+                if(weight>0)
+                	addEdge(i,i+num_v,weight);
+                weight = countEdgeWeight(i+num_v*2);
+                if(weight>0)
+                	addEdge(i,i+num_v*2,weight);
+                    	
         }
  
     }
@@ -132,6 +192,19 @@ public class InitialLayoutInvoker_one {
         edgelist.add(ie);
          
     }
+    
+    static double countEdgeWeight(int id){
+    	double count=0;
+        for(int i = 0; i < edgelist.size(); i++) {
+            InputEdge ie = (InputEdge)edgelist.elementAt(i);
+            // 既存エッジが存在するなら、それに重みを加算する
+            if(ie.node1 == id || ie.node2 == id) {
+            	count+=ie.weight;
+            }
+        }
+    	
+    	return count;
+    }
      
      
  
@@ -146,6 +219,7 @@ public class InitialLayoutInvoker_one {
         // リスト上の各ノードについて：
         //  座標値の最大・最小値を求める
         for(int i = 0; i < nodelist.size(); i++) {
+        //for(int i = 0; i < mesh.getNumVertices(); i++) {
             OutputNode on = (OutputNode)nodelist.elementAt(i);
             if(xmin > on.x) xmin = on.x;
             if(xmax < on.x) xmax = on.x;
@@ -155,7 +229,22 @@ public class InitialLayoutInvoker_one {
  
         // Set the positions
         for(int i = 0; i < nodelist.size(); i++) {
+        //for(int i = 0; i < mesh.getNumVertices(); i++) {
             OutputNode on = (OutputNode)nodelist.elementAt(i);
+            if(on.id>=mesh.getNumVertices()){
+            	int id = on.id-mesh.getNumVertices();
+            	if(id>=mesh.getNumVertices()){
+            		id = id-mesh.getNumVertices();
+            		if(id>=mesh.getNumVertices())
+            			continue;
+            		mesh.getVertex(id).connectedPos[0] = ((on.x - xmin) / (xmax - xmin)) * 2.0 - 1.0;
+            		mesh.getVertex(id).connectedPos[1] = ((on.y - ymin) / (ymax - ymin)) * 2.0 - 1.0;
+            	}else{
+            		mesh.getVertex(id).connectingPos[0] = ((on.x - xmin) / (xmax - xmin)) * 2.0 - 1.0;
+            		mesh.getVertex(id).connectingPos[1] = ((on.y - ymin) / (ymax - ymin)) * 2.0 - 1.0;
+            	}
+            	continue;
+            }
             Vertex v = mesh.getVertex(on.id);
             double x = ((on.x - xmin) / (xmax - xmin)) * 2.0 - 1.0;
             double y = ((on.y - ymin) / (ymax - ymin)) * 2.0 - 1.0;

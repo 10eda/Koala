@@ -11,10 +11,14 @@ public class Vertex {
 	double color[] = new double[3];
 	ArrayList<Node> nodes = new ArrayList<Node>();
 	int id;
-	double dissim[];
+	double dissim[];  //dissim[n] : vertexs(n)との類似度(現在は隣接ノード数で計算している)
+	double dissim_connected[];
+	double dissim_connecting[];
 	ArrayList<Bundle> bundleOrder = new ArrayList<Bundle>();
 	ArrayList<Vertex> smallVertices = new ArrayList<Vertex>();
 	int numMaxLayer=0;
+	public double connectingPos[] = new double[3];
+	public double connectedPos[] = new double[3];
 
 	
 	public void setId(int id) {
