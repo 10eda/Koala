@@ -34,6 +34,7 @@ public class Graph {
 		mesh.newBundles();
 		this.setBundles();		//meshのbundleクラスの整理
 		postBundleEv();
+		System.out.println("Cross : "+mesh.judgeCross(edgeDensityThreshold));
 	}
 
 	public void generateEdges() {
@@ -274,8 +275,8 @@ public class Graph {
 				vertex.getOrder().add(bundles.get(num));
 				//System.out.println(num + " , " + buf);
 			}
-
 		}
+		
 	}
 
 
@@ -319,12 +320,12 @@ public class Graph {
 				return;
 			}
 			nums[buf_no]=0;	
-			mesh.bundleEv+=PostVertexEv(buf_no);
+			mesh.bundleEv+=PostVertexEv_new(buf_no);
 			//System.out.println(buf_no);
 		}
 	}
 
-	public double PostVertexEv(int num){
+	public double PostVertexEv_old(int num){
 		Vertex vertex = mesh.getVertices().get(num);
 		ArrayList<Bundle> bundles = vertex.getOrder();
 		boolean connecting=true;
@@ -624,6 +625,502 @@ public class Graph {
 
 		return 0.0;
 	}
+	
+	public double PostVertexEv(int num){
+		Vertex vertex = mesh.getVertices().get(num);
+		ArrayList<Bundle> bundles = vertex.getOrder();
+		boolean connecting=true;
+		double dissim[] = mesh.getVertex(num).getDissim();
+		double value=0;
+		//edgeDensityThreshold = 0.2;
+		//System.out.println("Ev : "+bundles.size());
+		if(bundles.size()<2)
+			return 0.0;
+		//for(int i=0;i<bundles.size();i++){
+		for(int i=1;i<bundles.size();i++){
+			Bundle b1 = bundles.get(i);
+			//if(dissim[b1.getID2()]!=1)
+			//System.out.println(dissim[b1.getID2()]);
+			//System.out.println("i:"+i);
+			if(dissim[b1.getID2()] > edgeDensityThreshold)
+				continue;
+			Bundle b2 = null;
+			//for(int j=(i+1)%bundles.size();j==i;j=(j+1)%bundles.size()){
+			//for(int j=i+1;j<bundles.size();j++){
+			//for(int j=i-1;j>=0;j--){
+			for(int jj=1;jj<bundles.size();jj++){
+				int j = (i-jj + bundles.size()) % bundles.size();
+				//System.out.println("j:"+j);
+				//System.out.println("dissim : "+dissim[bundles.get(j).getID2()]);
+				if(dissim[bundles.get(j).getID2()] > edgeDensityThreshold)
+					continue;
+				else{
+					b2 = bundles.get(j);
+					break;
+				}
+			}
+			if(b2==null)
+				continue;
+
+
+
+
+			/*2本のバンドルの評価*/
+			Vertex v1 = mesh.getVertices().get(b1.getID2());
+			Vertex v2 = mesh.getVertices().get(b2.getID2());
+
+			double pos1[] = new double[2];
+			if(b1.getConnectedMerge() == null){
+				pos1[0] = v1.getPosition()[0] - vertex.getPosition()[0];
+				pos1[1] = v1.getPosition()[1] - vertex.getPosition()[1];
+			}else{
+				pos1[0]=0;
+				pos1[1]=0;
+				for(int b = 0;b<b1.getConnectedMerge().size();b++){
+					pos1[0] += mesh.getVertex(b1.getConnectedMerge().get(b)).getPosition()[0];
+					pos1[1] += mesh.getVertex(b1.getConnectedMerge().get(b)).getPosition()[1];
+				}
+				pos1[0] /= b1.getConnectedMerge().size();
+				pos1[1] /= b1.getConnectedMerge().size();
+			}
+
+			double pos2[] = new double[2];
+			if(b2.getConnectedMerge() == null){
+				pos2[0] = v2.getPosition()[0] - vertex.getPosition()[0];
+				pos2[1] = v2.getPosition()[1] - vertex.getPosition()[1];
+			}else{
+				pos2[0]=0;
+				pos2[1]=0;
+				for(int b = 0;b<b2.getConnectedMerge().size();b++){
+					pos2[0] += mesh.getVertex(b2.getConnectedMerge().get(b)).getPosition()[0];
+					pos2[1] += mesh.getVertex(b2.getConnectedMerge().get(b)).getPosition()[1];
+				}
+				pos2[0] /= b2.getConnectedMerge().size();
+				pos2[1] /= b2.getConnectedMerge().size();
+			}
+
+			double ev = BundleEv(pos1,pos2);
+
+			double pos1_[] = new double[2];
+			pos1_[0] = v1.getPosition()[0] - vertex.getPosition()[0];
+			pos1_[1] = v1.getPosition()[1] - vertex.getPosition()[1];			
+
+			double pos2_[] = new double[2];
+			pos2_[0] = v2.getPosition()[0] - vertex.getPosition()[0];
+			pos2_[1] = v2.getPosition()[1] - vertex.getPosition()[1];
+
+			ev = BundleEv_(pos1,pos2);
+
+			//System.out.println(ev);
+
+			if(ev<edgeConfluenceThreshold)
+				continue;
+
+
+			//System.out.println(ev);
+			//System.out.println("BundleEv");
+
+			/*2本の向きの決定・逆向きの場合はcontinue*/
+			int b1_rote = b1.getRotation();
+			int b2_rote = b2.getRotation();
+			boolean b1_connecting = b1.getConnectingNum()>0;
+			boolean b1_connected = b1.getConnectedNum()>0;
+			boolean b2_connecting = b2.getConnectingNum()>0;
+			boolean b2_connected = b2.getConnectedNum()>0;
+
+			//b1とb2の状態を比較
+			//if((b1.getConnectingMerge()==null && b1.getConnectedMerge()==null) && (b1_connected && b1_connecting)){
+			if(((b1.getConnectingMerge()==null && b1.getConnectedMerge()==null)
+					&&(mesh.getBundle(b1.getID2(), b1.getID1()).getConnectedMerge()==null && mesh.getBundle(b1.getID2(), b1.getID1()).getConnectingMerge()==null))
+					&& (b1_connected && b1_connecting)){
+				//双方向だけど何ともバンドリングしてない場合->rotationが変えられる
+				//if((b2.getConnectingMerge()==null && b2.getConnectedMerge()==null) && (b2_connected && b2_connecting)){
+				if(((b2.getConnectingMerge()==null && b2.getConnectedMerge()==null)
+						 &&(mesh.getBundle(b2.getID2(), b2.getID1()).getConnectedMerge()==null && mesh.getBundle(b2.getID2(), b2.getID1()).getConnectingMerge()==null))
+						&& (b2_connected && b2_connecting)){
+					//b2も双方向かつ何ともバンドリングしてない場合->より本数の多い方をバンドリング
+					if(b1.getConnectingNum()+b2.getConnectingNum()>b1.getConnectedNum()+b2.getConnectedNum()){
+						connecting = true;
+						b1.setRotation(1);
+						mesh.getBundle(b1.getID2(), b1.getID1()).setRotation(1);
+						b2.setRotation(-1);
+						mesh.getBundle(b2.getID2(), b2.getID1()).setRotation(-1);
+					}else{
+						connecting = false;
+						b1.setRotation(-1);
+						mesh.getBundle(b1.getID2(), b1.getID1()).setRotation(-1);
+						b2.setRotation(1);
+						mesh.getBundle(b2.getID2(), b2.getID1()).setRotation(1);
+					}
+				}else{
+					//b2はrotationが変えられない場合
+					if(b2_connecting && (!b2_connected || b2_rote==-1)){
+						connecting = true;
+						b1.setRotation(1);
+						mesh.getBundle(b1.getID2(), b1.getID1()).setRotation(1);
+					}else if(b2_connected && (!b2_connecting || b2_rote==1)){
+						connecting = false;
+						b1.setRotation(-1);
+						mesh.getBundle(b1.getID2(), b1.getID1()).setRotation(-1);
+					}else{
+						continue;
+					}
+				}
+				
+				
+				
+			}else{
+				//b1がどれかとくっついてるor一方向じゃないから回転できない場合
+				if(((b2.getConnectingMerge()==null && b2.getConnectedMerge()==null)
+						 &&(mesh.getBundle(b2.getID2(), b2.getID1()).getConnectedMerge()==null && mesh.getBundle(b2.getID2(), b2.getID1()).getConnectingMerge()==null))
+						&& (b2_connected && b2_connecting)){
+					//b2(だけ)が双方向かつ何ともバンドリングしてない場合
+					if(b1_rote==0 && b1_connecting){
+						connecting =true;
+						b2.setRotation(-1);
+						mesh.getBundle(b2.getID2(), b2.getID1()).setRotation(-1);
+					}else if(b1_rote==0 && !b1_connecting){
+						connecting = false;
+						b2.setRotation(1);
+						mesh.getBundle(b2.getID2(), b2.getID1()).setRotation(1);
+					}else if(b1_rote==1){	
+						connecting = true;
+						b2.setRotation(-1);
+						mesh.getBundle(b2.getID2(), b2.getID1()).setRotation(-1);	
+					}else if(b1_rote==-1){
+						connecting = false;
+						b2.setRotation(1);
+						mesh.getBundle(b2.getID2(), b2.getID1()).setRotation(1);
+					}else{
+						continue;
+					}
+				}else if(b2_rote==0 && b1_rote==0 && b2_connecting && b1_connecting){
+					connecting = true;
+				}else if(b2_rote==0 && b1_rote==0 && !b2_connecting && !b1_connecting){
+					connecting = false;
+				}else if(b2_rote==-1 && b1_rote==0 && b1_connecting){
+					connecting = true;				
+				}else if(b2_rote==1 && b1_rote==0 && !b1_connecting){
+					connecting = false;				
+				}else if(b1_rote==1 && b2_rote==0 && b2_connecting){
+					connecting = true;					
+				}else if(b1_rote==-1 && b2_rote==0 && !b2_connecting){
+					connecting = false;					
+				}else if(b2_rote==-1 && b1_rote==1){
+					connecting = true;
+				}else if(b2_rote==1 && b1_rote==-1){
+					connecting = false;				
+				}else{
+					continue;
+				}
+				
+			}
+
+			//bundle内のArrayListを追加
+			ArrayList<Integer> b1_merge;
+			ArrayList<Integer> b2_merge;
+
+			if(connecting){
+				b1_merge = b1.getConnectingMerge();
+				b2_merge = b2.getConnectingMerge();
+				if(b1_merge==null && b2_merge==null){
+					ArrayList<Integer> array = new ArrayList<Integer>();
+					array.add(b1.getID2());
+					array.add(b2.getID2());
+					b1.setConnectingMerge(array);
+					b2.setConnectingMerge(array);
+					//mesh.getBundle(b1.getID2(), b1.getID1()).setConnectedMerge(array);
+					//mesh.getBundle(b2.getID2(), b2.getID1()).setConnectedMerge(array);
+				}else if(b1_merge==null){
+					b2_merge.add(b1.getID2());
+					b1.setConnectingMerge(b2_merge);
+					//mesh.getBundle(b1.getID2(), b1.getID1()).setConnectedMerge(b2_merge);
+				}else if(b2_merge==null){
+					b1_merge.add(b2.getID2());
+					b2.setConnectingMerge(b1_merge);
+					//mesh.getBundle(b2.getID2(), b2.getID1()).setConnectedMerge(b1_merge);
+				}else{
+					for(int l=0;l<b2_merge.size();l++){
+						int n = b2_merge.get(l);
+						if(b1_merge.indexOf(n) == -1){
+							b1_merge.add(n);
+						}
+					}				
+					for(int l=0;l<b2_merge.size();l++){
+						int n = b2_merge.get(l);
+						mesh.getBundle(b2.getID1(),n).setConnectingMerge(b1_merge);
+						//mesh.getBundle(n,b2.getID1()).setConnectedMerge(b1_merge);
+					}
+				}
+			}else{
+				b1_merge = b1.getConnectedMerge();
+				b2_merge = b2.getConnectedMerge();	
+				if(b1_merge==null && b2_merge==null){
+					ArrayList<Integer> array = new ArrayList<Integer>();
+					array.add(b1.getID2());
+					array.add(b2.getID2());
+					b1.setConnectedMerge(array);
+					b2.setConnectedMerge(array);
+					//mesh.getBundle(b1.getID2(), b1.getID1()).setConnectingMerge(array);
+					//mesh.getBundle(b2.getID2(), b2.getID1()).setConnectingMerge(array);
+				}else if(b1_merge==null){
+					b2_merge.add(b1.getID2());
+					b1.setConnectedMerge(b2_merge);
+					//mesh.getBundle(b1.getID2(), b1.getID1()).setConnectingMerge(b2_merge);
+				}else if(b2_merge==null){
+					b1_merge.add(b2.getID2());
+					b2.setConnectedMerge(b1_merge);
+					//mesh.getBundle(b2.getID2(), b2.getID1()).setConnectingMerge(b1_merge);
+				}else{
+					for(int l=0;l<b2_merge.size();l++){
+						int n = b2_merge.get(l);
+						if(b1_merge.indexOf(n) == -1){
+							b1_merge.add(n);
+						}
+					}				
+					for(int l=0;l<b2_merge.size();l++){
+						int n = b2_merge.get(l);
+						mesh.getBundle(b2.getID1(),n).setConnectedMerge(b1_merge);
+					}
+				}
+			}
+
+
+		}
+
+
+		return 0.0;
+	}
+	
+	public double PostVertexEv_new(int num){
+		Vertex vertex = mesh.getVertices().get(num);
+		ArrayList<Bundle> bundles = vertex.getOrder();
+		boolean connecting=true;
+		double dissim[] = mesh.getVertex(num).getDissim();
+		double value=0;
+		if(bundles.size()<2)
+			return 0.0;
+		for(int i=1;i<bundles.size();i++){
+			Bundle b1 = bundles.get(i);
+			if(dissim[b1.getID2()] > edgeDensityThreshold)
+				continue;
+			Bundle b2 = null;
+			for(int jj=1;jj<bundles.size();jj++){
+				int j = (i-jj + bundles.size()) % bundles.size();
+				if(dissim[bundles.get(j).getID2()] > edgeDensityThreshold)
+					continue;
+				else{
+					b2 = bundles.get(j);
+					break;
+				}
+			}
+			if(b2==null)
+				continue;
+			
+			//すでに2本が合流してたら何もしない
+			if(b1.getConnectedMerge()!=null) //connected同士が合流
+				if(b1.getConnectedMerge().indexOf(b2.getID2())!=-1)
+					continue;
+			if(b1.getConnectingMerge()!=null) //connecting同士が合流
+				if(b1.getConnectingMerge().indexOf(b2.getID2())!=-1)
+					continue;
+			
+			/*2本のバンドルの評価*/
+			Vertex v1 = mesh.getVertices().get(b1.getID2());
+			Vertex v2 = mesh.getVertices().get(b2.getID2());
+
+			double pos1[] = new double[2];
+			double pos2[] = new double[2];
+			
+			//connected同士の評価値
+			if(b1.getConnectedMerge() == null){
+				pos1[0] = v1.getPosition()[0] - vertex.getPosition()[0];
+				pos1[1] = v1.getPosition()[1] - vertex.getPosition()[1];
+			}else{
+				pos1[0]=0;
+				pos1[1]=0;
+				for(int b = 0;b<b1.getConnectedMerge().size();b++){
+					pos1[0] += mesh.getVertex(b1.getConnectedMerge().get(b)).getPosition()[0];
+					pos1[1] += mesh.getVertex(b1.getConnectedMerge().get(b)).getPosition()[1];
+				}
+				pos1[0] /= b1.getConnectedMerge().size();
+				pos1[1] /= b1.getConnectedMerge().size();
+			}
+			
+			if(b2.getConnectedMerge() == null){
+				pos2[0] = v2.getPosition()[0] - vertex.getPosition()[0];
+				pos2[1] = v2.getPosition()[1] - vertex.getPosition()[1];
+			}else{
+				pos2[0]=0;
+				pos2[1]=0;
+				for(int b = 0;b<b2.getConnectedMerge().size();b++){
+					pos2[0] += mesh.getVertex(b2.getConnectedMerge().get(b)).getPosition()[0];
+					pos2[1] += mesh.getVertex(b2.getConnectedMerge().get(b)).getPosition()[1];
+				}
+				pos2[0] /= b2.getConnectedMerge().size();
+				pos2[1] /= b2.getConnectedMerge().size();
+			}
+			double ev_connected = bundlePosEv(pos1,pos2);
+			
+			//connected同士の評価値
+			if(b1.getConnectingMerge() == null){
+				pos1[0] = v1.getPosition()[0] - vertex.getPosition()[0];
+				pos1[1] = v1.getPosition()[1] - vertex.getPosition()[1];
+			}else{
+				pos1[0]=0;
+				pos1[1]=0;
+				for(int b = 0;b<b1.getConnectingMerge().size();b++){
+					pos1[0] += mesh.getVertex(b1.getConnectingMerge().get(b)).getPosition()[0];
+					pos1[1] += mesh.getVertex(b1.getConnectingMerge().get(b)).getPosition()[1];
+				}
+				pos1[0] /= b1.getConnectingMerge().size();
+				pos1[1] /= b1.getConnectingMerge().size();
+			}
+			
+			if(b2.getConnectingMerge() == null){
+				pos2[0] = v2.getPosition()[0] - vertex.getPosition()[0];
+				pos2[1] = v2.getPosition()[1] - vertex.getPosition()[1];
+			}else{
+				pos2[0]=0;
+				pos2[1]=0;
+				for(int b = 0;b<b2.getConnectingMerge().size();b++){
+					pos2[0] += mesh.getVertex(b2.getConnectingMerge().get(b)).getPosition()[0];
+					pos2[1] += mesh.getVertex(b2.getConnectingMerge().get(b)).getPosition()[1];
+				}
+				pos2[0] /= b2.getConnectingMerge().size();
+				pos2[1] /= b2.getConnectingMerge().size();
+			}
+			double ev_connecting = bundlePosEv(pos1,pos2);
+			
+			//合流する向きの決定
+			int b1_rote = b1.getRotation();
+			int b2_rote = b2.getRotation();
+			boolean b1_connecting = b1.getConnectingNum()>0;
+			boolean b1_connected = b1.getConnectedNum()>0;
+			boolean b2_connecting = b2.getConnectingNum()>0;
+			boolean b2_connected = b2.getConnectedNum()>0;
+			boolean b1_connecting_merge = b1.getConnectingMerge()==null && mesh.getBundle(b1.getID2(), b1.getID1()).getConnectedMerge()==null;
+			boolean b1_connected_merge = b1.getConnectedMerge()==null && mesh.getBundle(b1.getID2(), b1.getID1()).getConnectingMerge()==null;
+			boolean b2_connecting_merge = b2.getConnectingMerge()==null && mesh.getBundle(b2.getID2(), b2.getID1()).getConnectedMerge()==null;
+			boolean b2_connected_merge = b2.getConnectedMerge()==null && mesh.getBundle(b2.getID2(), b2.getID1()).getConnectingMerge()==null;
+			int connecting_sum = b1.getConnectingNum() + b2.getConnectingNum();
+			int connected_sum = b1.getConnectedNum() + b2.getConnectedNum();
+			//ev_connected *= (double)connected_sum /(double)(connecting_sum+connected_sum);
+			//ev_connecting *= (double)connecting_sum /(double)(connecting_sum+connected_sum);
+			
+			//connectingとconnected、それぞれについてb1b2両方が本数なかったら合流しない
+			if(!b1_connecting || !b2_connecting)
+				ev_connecting=0;			
+			if(!b1_connected || !b2_connected)
+				ev_connected=0;			
+				
+			//両方評価値以下なら合流しない
+			if(ev_connecting<edgeConfluenceThreshold && ev_connected<edgeConfluenceThreshold)
+				continue;
+			
+			if(ev_connecting>edgeConfluenceThreshold && ev_connected>edgeConfluenceThreshold){
+				if(ev_connecting>ev_connected){
+					connecting=true;
+				}else{
+					connecting=false;
+				}
+			}else if(ev_connecting>edgeConfluenceThreshold){
+				connecting=true;
+			}else if(ev_connected>edgeConfluenceThreshold){
+				connecting=false;
+			}else 
+				continue;
+
+			//bundle内のArrayListを追加
+			ArrayList<Integer> b1_merge;
+			ArrayList<Integer> b2_merge;
+			if(connecting){
+				b1_merge = b1.getConnectingMerge();
+				b2_merge = b2.getConnectingMerge();
+				if(b1_merge==null && b2_merge==null){
+					ArrayList<Integer> array = new ArrayList<Integer>();
+					array.add(b1.getID2());
+					array.add(b2.getID2());
+					b1.setConnectingMerge(array);
+					b2.setConnectingMerge(array);
+				}else if(b1_merge==null){
+					b2_merge.add(b1.getID2());
+					b1.setConnectingMerge(b2_merge);
+				}else if(b2_merge==null){
+					b1_merge.add(b2.getID2());
+					b2.setConnectingMerge(b1_merge);
+				}else{
+					for(int l=0;l<b2_merge.size();l++){
+						int n = b2_merge.get(l);
+						if(b1_merge.indexOf(n) == -1){
+							b1_merge.add(n);
+						}
+					}				
+					for(int l=0;l<b2_merge.size();l++){
+						int n = b2_merge.get(l);
+						mesh.getBundle(b2.getID1(),n).setConnectingMerge(b1_merge);
+					}
+				}
+			}else{
+				b1_merge = b1.getConnectedMerge();
+				b2_merge = b2.getConnectedMerge();	
+				if(b1_merge==null && b2_merge==null){
+					ArrayList<Integer> array = new ArrayList<Integer>();
+					array.add(b1.getID2());
+					array.add(b2.getID2());
+					b1.setConnectedMerge(array);
+					b2.setConnectedMerge(array);
+				}else if(b1_merge==null){
+					b2_merge.add(b1.getID2());
+					b1.setConnectedMerge(b2_merge);
+				}else if(b2_merge==null){
+					b1_merge.add(b2.getID2());
+					b2.setConnectedMerge(b1_merge);
+				}else{
+					for(int l=0;l<b2_merge.size();l++){
+						int n = b2_merge.get(l);
+						if(b1_merge.indexOf(n) == -1){
+							b1_merge.add(n);
+						}
+					}				
+					for(int l=0;l<b2_merge.size();l++){
+						int n = b2_merge.get(l);
+						mesh.getBundle(b2.getID1(),n).setConnectedMerge(b1_merge);
+					}
+				}
+			}
+			
+			//rotationを今回の合流に合わせて変更
+			if(connecting){
+				b1.changeRotation(1);
+				b2.changeRotation(-1);
+				mesh.getBundle(b1.getID2(), b1.getID1()).changeRotation(1);
+				mesh.getBundle(b2.getID2(), b2.getID1()).changeRotation(-1);
+			}else{
+				b1.changeRotation(-1);
+				b2.changeRotation(1);
+				mesh.getBundle(b1.getID2(), b1.getID1()).changeRotation(-1);
+				mesh.getBundle(b2.getID2(), b2.getID1()).changeRotation(1);
+			}
+
+			//b0:b1の右隣(b2の逆側)の束
+			Bundle rignt = null;
+			for(int jj=1;jj<bundles.size();jj++){
+				int j = (i+jj) % bundles.size();
+				if(dissim[bundles.get(j).getID2()] > edgeDensityThreshold)
+					continue;
+				else{
+					rignt = bundles.get(j);
+					break;
+				}
+			}
+
+
+		}
+
+
+		return 0.0;
+	}
 
 	public double VertexEv(int num){
 		Vertex vertex = mesh.getVertices().get(num);
@@ -794,6 +1291,18 @@ public class Graph {
 			}
 		}
 	}
+	
+	public void resetConverge(){
+		int num = mesh.getNumVertices();
+		for(int i=0;i<num;i++){
+			ArrayList<Bundle> bundles = mesh.getBundles(i);
+			for(int j=0;j<num;j++){
+				Bundle b = bundles.get(j);
+				b.resetConnecingdMerge();
+				b.resetConnectedMerge();
+			}
+		}
+	}
 
 	public void BundlesDelete(double oldRate,double newRate){
 		for(int i = 0;i<mesh.getNumVertices();i++){
@@ -804,9 +1313,12 @@ public class Graph {
 		edgeDensityThreshold = newRate;
 		
 		//とりあえず
+		resetConverge();
+		
 		for(int i = 0;i<mesh.getNumVertices();i++){
-			mesh.bundleEv+=PostVertexEv(i);
+			mesh.bundleEv+=PostVertexEv_new(i);
 		}
+		
 		
 	}
 
@@ -814,7 +1326,7 @@ public class Graph {
 		edgeDensityThreshold = newRate;
 		for(int i = 0;i<mesh.getNumVertices();i++){
 			//System.out.println("postBundleEv : "+i);
-			mesh.bundleEv+=PostVertexEv(i);
+			mesh.bundleEv+=PostVertexEv_new(i);
 		}
 	}
 
@@ -843,6 +1355,17 @@ public class Graph {
 		return (cos*1/3 + dis*2/3);
 		//return (cos-dis*2);
 	}
+	
+	public double BundleCos(double vec1[], double vec2[]){
+		double vec[] = new double[2];
+		vec[0] = vec1[0] + vec2[0];
+		vec[1] = vec1[1] + vec2[1];
+		
+		double cos = (vec1[0]*vec2[0]+vec1[1]*vec2[1])/
+				(Math.sqrt(vec1[0]*vec1[0]+vec1[1]*vec1[1])*Math.sqrt(vec2[0]*vec2[0]+vec2[1]*vec2[1]));
+		
+		return cos;
+	}
 
 	//BundleEv_ : 合流させるべきかの評価。戻り値:0~1
 	//角度である程度選別した後合流できる長さを算出する(発表で使ってるやつ)
@@ -862,6 +1385,51 @@ public class Graph {
 		if(cos>1.0){
 			return 0.0;
 		}
+		
+		double vect[] = new double[2];
+		vect[0] = vec2[0]*vec1[0] + vec2[1]*vec1[1];
+		vect[1] = - vec2[0]*vec1[1] + vec2[1]*vec1[0];
+		
+		if(vect[0]<0 || vect[1]<0)
+			return 0.0;
+	
+
+		double cos1 = (vec1[0]*vec[0]+vec1[1]*vec[1])/
+				Math.sqrt((vec1[0]*vec1[0]+vec1[1]*vec1[1])*(vec[0]*vec[0]+vec[1]*vec[1]));
+		double cos2 = (vec2[0]*vec[0]+vec2[1]*vec[1])/
+				Math.sqrt((vec2[0]*vec2[0]+vec2[1]*vec2[1])*(vec[0]*vec[0]+vec[1]*vec[1]));
+
+		double v1 = Math.sqrt(vec1[0]*vec1[0] + vec1[1]*vec1[1]) * cos1 ;
+		double v2 = Math.sqrt(vec2[0]*vec2[0] + vec2[1]*vec2[1]) * cos2 ;
+
+		return (v1<v2) ? v1:v2;
+	}
+	
+	//bundlePosEv : 合流させるべきかを束同士の位置関係から評価。戻り値:0~1
+	//角度である程度選別した後合流できる長さを算出する(発表で使ってるやつ)
+	public double bundlePosEv(double vec1[], double vec2[]){
+		double vec[] = new double[2];
+		vec[0] = vec1[0] + vec2[0];
+		vec[1] = vec1[1] + vec2[1];
+		
+		double cos = (vec1[0]*vec2[0]+vec1[1]*vec2[1])/
+				(Math.sqrt(vec1[0]*vec1[0]+vec1[1]*vec1[1])*Math.sqrt(vec2[0]*vec2[0]+vec2[1]*vec2[1]));
+		
+		//System.out.println("cos:"+cos);
+		
+		if(cos<0.50){
+			return 0.0;
+		}
+		if(cos>1.0){
+			return 0.0;
+		}
+		
+		double vect[] = new double[2];
+		vect[0] = vec2[0]*vec1[0] + vec2[1]*vec1[1];
+		vect[1] = - vec2[0]*vec1[1] + vec2[1]*vec1[0];
+		
+		if(vect[0]<0 || vect[1]<0)
+			return 0.0;
 	
 
 		double cos1 = (vec1[0]*vec[0]+vec1[1]*vec[1])/
@@ -880,12 +1448,15 @@ public class Graph {
 			for(int i = 0;i<mesh.getNumVertices();i++){
 				//System.out.println("postBundleEv : "+i);
 				edgeConfluenceThreshold=ratio;
-				mesh.bundleEv+=PostVertexEv(i);
+				mesh.bundleEv+=PostVertexEv_new(i);
 			}
 		}else if(edgeConfluenceThreshold<ratio){
+			resetConverge();
+			mesh.bundleEv=0;
 			for(int i = 0;i<mesh.getNumVertices();i++){
 				//System.out.println("postBundleEv : "+i);
-				mesh.bundleEv+=VertexEv_delete(ratio, i);
+				//mesh.bundleEv+=VertexEv_delete(ratio, i);
+				mesh.bundleEv+=PostVertexEv_new(i);
 			}
 		}
 

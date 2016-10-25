@@ -18,6 +18,9 @@ public class Bundle {
 	ArrayList<Integer> merge_connected;
 	double angle; //connectedIDÅ®connectingIDÇÃäpìx
 	
+	double connecting_angle;
+	double connected_angle;
+	
 	public Bundle(int num1, int num2){
 		id1 = num1;
 		id2 = num2;
@@ -31,6 +34,8 @@ public class Bundle {
 		angle=-1;
 		merge_connecting = null;
 		merge_connected = null;
+		connecting_angle=-1;
+		connected_angle=-1;
 	}
 	
 	public void resetBundle(int id1, int id2){
@@ -64,6 +69,11 @@ public class Bundle {
 	
 	public void changeRotation(){
 		rotation = rotation*(-1);
+	}
+	
+	public void changeRotation(int i){
+		if(rotation!=0)
+			rotation = i;
 	}
 	
 	public void setNum(int connecting, int connected){
@@ -130,12 +140,38 @@ public class Bundle {
 		merge_connected.add(i);
 	}
 	
+	public void resetConnectedMerge(){
+		merge_connected=null;
+	}
+	
+	public void resetConnecingdMerge(){
+		merge_connecting=null;
+	}
+	
 	public void setConnectingMerge(ArrayList<Integer> list){
 		merge_connecting = list;
 	}
 	
 	public void setConnectedMerge(ArrayList<Integer> list){
 		merge_connected = list;
+	}
+	
+	public void addConnectingMerge(ArrayList<Integer> list){
+		for(int l=0;l<list.size();l++){
+			int n = list.get(l);
+			if(merge_connecting.indexOf(n) == -1){
+				merge_connecting.add(n);
+			}
+		}
+	}
+	
+	public void addConnectedMerge(ArrayList<Integer> list){
+		for(int l=0;l<list.size();l++){
+			int n = list.get(l);
+			if(merge_connected.indexOf(n) == -1){
+				merge_connected.add(n);
+			}
+		}
 	}
 	
 	public ArrayList<Integer> getConnectingMerge(){

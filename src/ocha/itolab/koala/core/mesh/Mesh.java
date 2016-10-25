@@ -273,5 +273,57 @@ public class Mesh {
 			
 		}
 	}
+	
+	//交差してるエッジの割合を算出(0~1)
+	public double judgeCross(double threshold){
+		int count=0;
+		int count_cross=0;
+		int int1=1;
+		int int2=1;
+		
+		for(int i=0; i<getNumVertices(); i++){
+			double v1[] = getVertex(i).getPosition();
+			for(int j=i+1; j<getNumVertices(); j++){
+				if(getVertex(i).dissim[j]>threshold) continue;
+				//if(getBundle(i,j).getConnectingNum()==0 && getBundle(i,j).getConnectedNum()==0) continue;
+				if(getBundle(i,j).getConnectingNum()>0 && getBundle(i,j).getConnectedNum()>0) int1=2;
+				else int1=1;
+				double v2[] = getVertex(j).getPosition();
+				for(int k=0; k<getNumVertices(); k++){
+					if(k==i || k==j) continue;
+					double v3[] = getVertex(k).getPosition();
+					for(int l=k+1; l<getNumVertices(); l++){
+						if(getVertex(k).dissim[l]>threshold) continue;
+						//if(getBundle(k,l).getConnectingNum()==0 && getBundle(k,l).getConnectedNum()==0) continue;
+						if(getBundle(k,l).getConnectingNum()>0 && getBundle(k,l).getConnectedNum()>0) int2=2;
+						else int2=1;
+						if(l==i || l==j) continue;
+						double v4[] = getVertex(l).getPosition();
+						count+=int1*int2;
+						//System.out.println(v1[0]+","+v1[1]+","+v2[0]+","+v2[1]+","+v3[0]+","+v3[1]+","+v4[0]+","+v4[1]);
+						if(judgeCrossOne(v1[0],v1[1],v2[0],v2[1],v3[0],v3[1],v4[0],v4[1])){
+							//System.out.println("cross!");
+							count_cross+=int1+int2;
+						}
+					}
+				}
+			}
+		}
+		
+		System.out.println(count_cross+" "+count);
+		if(count==0)
+			return 0;
+		else
+			return (double)count_cross/(double)count;
+	}
+	
+	public boolean judgeCrossOne(double ax,double ay,double bx,double by,double cx,double cy,double dx,double dy){
+		double ta = (cx - dx) * (ay - cy) + (cy - dy) * (cx - ax);
+		double tb = (cx - dx) * (by - cy) + (cy - dy) * (cx - bx);
+		double tc = (ax - bx) * (cy - ay) + (ay - by) * (ax - cx);
+		double td = (ax - bx) * (dy - ay) + (ay - by) * (ax - dx);
+		
+		return tc * td < 0 && ta * tb < 0;
+	}
 
 }
