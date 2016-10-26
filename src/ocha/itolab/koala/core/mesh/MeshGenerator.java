@@ -416,8 +416,6 @@ public class MeshGenerator {
 			writer = null;
 			return;
 		}
-
-
 	}
 
 

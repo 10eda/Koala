@@ -452,13 +452,14 @@ public class Drawer implements GLEventListener {
 		if(graph == null) return;
 		if(graph.mesh == null) return;
 		
+		//合流・双方向・それ以外のカウント用
 		int count_converge = 0;
 		int count_interactive = 0;
 		int count_nocurve = 0;
 		
-
-		int BundleNum = 0;
-		int notBundleNum = 0;
+		//交差する束のカウント用
+		int count_bundle=0;
+		int count_cross=0;
 
 		// Draw bundled edges
 		gl2.glColor3d(0.7, 0.7, 0.7);
@@ -532,7 +533,7 @@ public class Drawer implements GLEventListener {
 					startBundlePos = null;
 				}
 				else{
-					//System.out.println(startBundlesList.size());
+					System.out.println("start:"+startBundlesList.size());
 					for(int bb = 0; bb<startBundlesList.size(); bb++){
 						Vertex v = mesh.getVertex(startBundlesList.get(bb));
 						startBundlePos[0] += v.getPosition()[0];
@@ -554,7 +555,7 @@ public class Drawer implements GLEventListener {
 					endBundlePos = null;
 				}
 				else{
-					//System.out.println(endBundlesList.size());
+					System.out.println("end:"+endBundlesList.size());
 					for(int bb = 0; bb<endBundlesList.size(); bb++){
 						Vertex v = mesh.getVertex(endBundlesList.get(bb));
 						endBundlePos[0] += v.getPosition()[0];
@@ -575,7 +576,6 @@ public class Drawer implements GLEventListener {
 						if(graph.isNodeConnected1to2(n1, n2) == false)
 							continue;
 						if(startBundlesList==null & endBundlesList==null){
-							notBundleNum++;
 							if(rotation!=0){
 								count_interactive++;
 								drawBundledEdges(v1, v2, n1, n2,rotation,angle); //合流しないけど双方向
@@ -585,7 +585,6 @@ public class Drawer implements GLEventListener {
 							}
 						}else{
 							count_converge++;
-							BundleNum++;
 							drawBundledEdges_(v1, v2, n1, n2,rotation, mesh, startBundlePos,endBundlePos,angle); //合流する
 						}
 
@@ -1281,6 +1280,14 @@ public class Drawer implements GLEventListener {
 			p2[0] = v2pos[0] + vec2[0]*mergeStrength*0.5 + (v2pos[0]-p3[0])*(mergeStrength*0.5);
 			p2[1] = v2pos[1] + vec2[1]*mergeStrength*0.5 + (v2pos[1]-p3[1])*(mergeStrength*0.5);
 		}
+		
+		
+		//Spline曲線のときだけ使う
+		p1[0] = p1[0] + (p0[0] - v1pos[0])*0.5;
+		p1[1] = p1[1] + (p0[1] - v1pos[1])*0.5;
+		p2[0] = p2[0] + (p3[0] - v2pos[0])*0.5;
+		p2[1] = p2[1] + (p3[1] - v2pos[1])*0.5;
+		
 
 		//if(startBundlePos!=null || endBundlePos!=null){
 			//Kyokuritsu(p0[0],p0[1],p1[0],p1[1],p2[0],p2[1],p3[0],p3[1]);
@@ -1288,8 +1295,8 @@ public class Drawer implements GLEventListener {
 		//Kyokuritsu(p0[0],p0[1],p1[0],p1[1],p2[0],p2[1],p3[0],p3[1]);
 		//System.out.println(p0[0] + ","+p1[1]);
 		
-		drawBezier(p0,p1,p2,p3,z1,z2,mesh);
-		//drawSpline(p0,p1,p2,p3,z1,z2,mesh,v1,v2);
+		//drawBezier(p0,p1,p2,p3,z1,z2,mesh);
+		drawSpline(p0,p1,p2,p3,z1,z2,mesh);
 		/*
 		double pt[] = new double[2];
 		gl2.glBegin(GL2.GL_LINE_STRIP);
@@ -1344,7 +1351,7 @@ public class Drawer implements GLEventListener {
 
 	}	
 	
-	void drawSpline(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh, Vertex v1, Vertex v2){
+	void drawSpline(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh){
 		int NUM_T = 100;
 		double pt[] = new double[2];
 		gl2.glBegin(GL2.GL_LINE_STRIP);
@@ -1551,8 +1558,8 @@ public class Drawer implements GLEventListener {
 
 		double disX = v2pos[0] - v1pos[0];
 		double disY = v2pos[1] - v1pos[1];
-		disX/=3;
-		disY/=3;
+		disX/=4;
+		disY/=4;
 		double para=rotationStrength;
 		p1[0] = p1[0] - rotation*para*disY;
 		p1[1] = p1[1] + rotation*para*disX;
@@ -1561,6 +1568,7 @@ public class Drawer implements GLEventListener {
 		
 
 		drawBezier(p0,p1,p2,p3,z1,z2,graph.mesh);
+		//drawSpline(p0,p1,p2,p3,z1,z2,graph.mesh);
 
 		/*
 		double pt[] = new double[2];

@@ -24,7 +24,7 @@ public class InitialLayoutInvoker_one {
     static int method = LINLOG;
     static String path = "/Users/ntoeda/eclipse/LayoutTest/";
     static String filename = "edges_fme.gml";
-     
+    
     /**
      * Execute
      */
@@ -147,15 +147,42 @@ public class InitialLayoutInvoker_one {
             }
         }
         
+        
+        /*
+        //接続ノードが1個でも制御点を取り除かないver
         for(int i = 0; i < mesh.getNumVertices(); i++) {
             	double weight = countEdgeWeight(i+num_v);
                 if(weight>0)
                 	addEdge(i,i+num_v,weight);
                 weight = countEdgeWeight(i+num_v*2);
                 if(weight>0)
-                	addEdge(i,i+num_v*2,weight);
-                    	
+                	addEdge(i,i+num_v*2,weight);            	
         }
+        */
+        
+        
+        
+        
+        //接続ノードが1個だったら制御点削除するver
+        for(int i = 0; i < mesh.getNumVertices(); i++) {
+        	//double weight = countEdgeWeight(i+num_v);
+        	int count = countEdgeNum(i+num_v);
+            if(count==1)
+            	removeCtrlPt(i,i+num_v);
+            else if(count>0)
+            	addEdge(i,i+num_v,countEdgeNum(i+num_v));
+        	
+        	count = countEdgeNum(i+num_v);
+            if(count==1)
+            	removeCtrlPt(i,i+num_v*2);
+            else if(count>0)
+            	addEdge(i,i+num_v*2,countEdgeNum(i+num_v*2));        	
+        }
+        
+        
+        
+        
+        
  
     }
  
@@ -191,6 +218,75 @@ public class InitialLayoutInvoker_one {
         ie.weight = weight;
         edgelist.add(ie);
          
+    }
+    
+    //エッジ削除
+    static void removeEdge(int id1, int id2){
+        // IDの大小関係を統一する
+        if(id1 > id2) {
+            int tmp = id1;
+            id1 = id2;   id2 = tmp;
+        }
+        
+        for(int i = 0; i < edgelist.size(); i++) {
+            InputEdge ie = (InputEdge)edgelist.elementAt(i);
+             
+            // 既存エッジが存在するなら、それに重みを加算する
+            if(ie.node1 == id1 && ie.node2 == id2) {
+                edgelist.remove(i);
+                return;
+            }
+        }	
+    }
+    
+    //id1-id2のエッジを削除してnewID-id2にする
+    static void changeEdge(int id1, int id2, int newID){        
+        for(int i = 0; i < edgelist.size(); i++) {
+            InputEdge ie = (InputEdge)edgelist.elementAt(i);
+             
+            // 既存エッジが存在するなら、それに重みを加算する
+            if(ie.node1 == id1 && ie.node2 == id2) {
+            	addEdge(id2,newID,ie.weight);
+                edgelist.remove(i);
+                return;
+            }
+            
+            if(ie.node1 == id2 && ie.node2 == id1) {
+            	addEdge(id2,newID,ie.weight);
+                edgelist.remove(i);
+                return;
+            }
+        }	
+    }
+    
+    //制御点を削除して本物のノードと接続する
+    static void removeCtrlPt(int pt, int ctrl){
+        for(int i = 0; i < edgelist.size(); i++) {
+            InputEdge ie = (InputEdge)edgelist.elementAt(i);
+            if(ie.node1 == ctrl){
+            	int id = ie.node2;
+            	addEdge(pt,id,ie.weight);
+            	edgelist.remove(i);
+            	return;
+            }else if(ie.node2 == ctrl){
+            	int id = ie.node1;
+            	addEdge(pt,id,ie.weight);
+            	edgelist.remove(i);
+            	return;
+            }
+        }
+    }
+    
+    static int countEdgeNum(int id){
+    	int count=0;
+        for(int i = 0; i < edgelist.size(); i++) {
+            InputEdge ie = (InputEdge)edgelist.elementAt(i);
+            // 既存エッジが存在するなら、それに重みを加算する
+            if(ie.node1 == id || ie.node2 == id) {
+            	count++;
+            }
+        }
+    	return count;
     }
     
     static double countEdgeWeight(int id){
