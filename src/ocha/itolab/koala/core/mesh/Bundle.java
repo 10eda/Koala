@@ -17,6 +17,7 @@ public class Bundle {
 	ArrayList<Integer> merge_connecting; //vert‚Ì”Ô†‚ªŠi”[‚³‚ê‚Ä‚é
 	ArrayList<Integer> merge_connected;
 	double angle; //connectedID¨connectingID‚ÌŠp“x
+	double cosine;
 	
 	double connecting_angle;
 	double connected_angle;
@@ -36,6 +37,7 @@ public class Bundle {
 		merge_connected = null;
 		connecting_angle=-1;
 		connected_angle=-1;
+		cosine = 1.0/Math.sqrt(2.0);
 	}
 	
 	public void resetBundle(int id1, int id2){
@@ -180,6 +182,14 @@ public class Bundle {
 	
 	public ArrayList<Integer> getConnectedMerge(){
 		return merge_connected;
+	}
+	
+	public void setLeftCosine(double cosine){
+		cosine_left = cosine;
+	}
+	
+	public void setRightCosine(double cosine){
+		cosine_right = cosine;
 	}
 	
 }

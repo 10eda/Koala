@@ -23,7 +23,7 @@ public class Graph {
 
 	double edgeDensityThreshold = 0.1;
 
-	double edgeConfluenceThreshold = 0.5;
+	double edgeConfluenceThreshold = 0.1;
 	
 	int map[][];
 
@@ -213,7 +213,7 @@ public class Graph {
 					double vec[] = new double[2];
 					double angle;
 					vec[0] = v2pos[0] - v1pos[0];
-					vec[1] = v2pos[1] - v1pos[1];               
+					vec[1] = v2pos[1] - v1pos[1];
 					angle = (1.0*vec[0])/Math.sqrt((vec[0]*vec[0]+vec[1]*vec[1]));
 					/*
 					if(vec[1]>0){
@@ -240,7 +240,6 @@ public class Graph {
 						mesh.getBundle(j,i).setAngle(angle);
 					}
 					//System.out.println(angle);
-
 				}
 			}
 		}
@@ -925,6 +924,10 @@ public class Graph {
 				if(b1.getConnectingMerge().indexOf(b2.getID2())!=-1)
 					continue;
 			
+			//connecting‚Æconnected‚Ì‚Ç‚Á‚¿‚©‚ªb1b2‚Ì—¼•û‚É‘µ‚Á‚Ä‚È‚©‚Á‚½‚ç‰½‚à‚µ‚È‚¢
+			if(!(b1.getConnectingNum()>0&&b2.getConnectingNum()>0) && !(b1.getConnectedNum()>0&&b2.getConnectedNum()>0))
+				continue;
+			
 			/*2–{‚Ìƒoƒ“ƒhƒ‹‚Ì•]‰¿*/
 			Vertex v1 = mesh.getVertices().get(b1.getID2());
 			Vertex v2 = mesh.getVertices().get(b2.getID2());
@@ -932,7 +935,18 @@ public class Graph {
 			double pos1[] = new double[2];
 			double pos2[] = new double[2];
 			
-			//connected“¯m‚Ì•]‰¿’l
+			//ev :ƒˆ‚É3‚Â‚ÌvertexŠÔ‚Å‚Ì•]‰¿’l
+			pos1[0] = v1.getPosition()[0] - vertex.getPosition()[0];
+			pos1[1] = v1.getPosition()[1] - vertex.getPosition()[1];
+			pos2[0] = v2.getPosition()[0] - vertex.getPosition()[0];
+			pos2[1] = v2.getPosition()[1] - vertex.getPosition()[1];
+			double ev = bundlePosEv(pos1,pos2);
+			
+			//•]‰¿’lˆÈ‰º‚È‚ç‡—¬‚µ‚È‚¢
+			if(ev<edgeConfluenceThreshold)
+				continue;
+			
+			//ev_connected : connected“¯m‚Ì•]‰¿’l
 			if(b1.getConnectedMerge() == null){
 				pos1[0] = v1.getPosition()[0] - vertex.getPosition()[0];
 				pos1[1] = v1.getPosition()[1] - vertex.getPosition()[1];
@@ -962,7 +976,7 @@ public class Graph {
 			}
 			double ev_connected = bundlePosEv(pos1,pos2);
 			
-			//connected“¯m‚Ì•]‰¿’l
+			//ev_connecting : connected“¯m‚Ì•]‰¿’l
 			if(b1.getConnectingMerge() == null){
 				pos1[0] = v1.getPosition()[0] - vertex.getPosition()[0];
 				pos1[1] = v1.getPosition()[1] - vertex.getPosition()[1];
@@ -999,10 +1013,14 @@ public class Graph {
 			boolean b1_connected = b1.getConnectedNum()>0;
 			boolean b2_connecting = b2.getConnectingNum()>0;
 			boolean b2_connected = b2.getConnectedNum()>0;
-			boolean b1_connecting_merge = b1.getConnectingMerge()==null && mesh.getBundle(b1.getID2(), b1.getID1()).getConnectedMerge()==null;
-			boolean b1_connected_merge = b1.getConnectedMerge()==null && mesh.getBundle(b1.getID2(), b1.getID1()).getConnectingMerge()==null;
-			boolean b2_connecting_merge = b2.getConnectingMerge()==null && mesh.getBundle(b2.getID2(), b2.getID1()).getConnectedMerge()==null;
-			boolean b2_connected_merge = b2.getConnectedMerge()==null && mesh.getBundle(b2.getID2(), b2.getID1()).getConnectingMerge()==null;
+			//boolean b1_connecting_merge = b1.getConnectingMerge()==null && mesh.getBundle(b1.getID2(), b1.getID1()).getConnectedMerge()==null;
+			//boolean b1_connected_merge = b1.getConnectedMerge()==null && mesh.getBundle(b1.getID2(), b1.getID1()).getConnectingMerge()==null;
+			//boolean b2_connecting_merge = b2.getConnectingMerge()==null && mesh.getBundle(b2.getID2(), b2.getID1()).getConnectedMerge()==null;
+			//boolean b2_connected_merge = b2.getConnectedMerge()==null && mesh.getBundle(b2.getID2(), b2.getID1()).getConnectingMerge()==null;
+			boolean b1_connecting_merge = b1.getConnectingMerge()!=null;
+			boolean b1_connected_merge = b1.getConnectedMerge()!=null;
+			boolean b2_connecting_merge = b2.getConnectingMerge()!=null;
+			boolean b2_connected_merge = b2.getConnectedMerge()!=null;
 			int connecting_sum = b1.getConnectingNum() + b2.getConnectingNum();
 			int connected_sum = b1.getConnectedNum() + b2.getConnectedNum();
 			//ev_connected *= (double)connected_sum /(double)(connecting_sum+connected_sum);
@@ -1014,9 +1032,11 @@ public class Graph {
 			if(!b1_connected || !b2_connected)
 				ev_connected=0;			
 				
+			
 			//—¼•û•]‰¿’lˆÈ‰º‚È‚ç‡—¬‚µ‚È‚¢
 			if(ev_connecting<edgeConfluenceThreshold && ev_connected<edgeConfluenceThreshold)
 				continue;
+			
 			
 			if(ev_connecting>edgeConfluenceThreshold && ev_connected>edgeConfluenceThreshold){
 				if(ev_connecting>ev_connected){
@@ -1030,6 +1050,24 @@ public class Graph {
 				connecting=false;
 			}else 
 				continue;
+			
+			
+			//—¼•û‘o•ûŒü‚Ìê‡‚Ì“Á•Êˆ—
+			//b1‚Æb2‚Ì‚Ç‚Á‚¿‚©‚Ìing‚Æed‚Ì‚Ç‚Á‚¿‚©‚¾‚¯‚ª‡—¬‚µ‚Ä‚½‚ç‚»‚Á‚¿‚É‡‚í‚¹‚é
+			if(b1_connecting && b2_connecting && b1_connected && b2_connected){
+				if(!b1_connecting_merge && !b1_connected_merge){
+					if(b2_connecting_merge && !b2_connected_merge)
+						connecting = true;
+					else if(!b2_connecting_merge && b2_connected_merge)
+						connecting = false;
+				}else if(!b2_connecting_merge && !b2_connected_merge){
+					if(b1_connecting_merge && !b1_connected_merge)
+						connecting = true;
+					else if(!b1_connecting_merge && b1_connected_merge)
+						connecting = false;
+				}
+			}
+			
 
 			//bundle“à‚ÌArrayList‚ğ’Ç‰Á
 			ArrayList<Integer> b1_merge;
@@ -1114,11 +1152,7 @@ public class Graph {
 					break;
 				}
 			}
-
-
 		}
-
-
 		return 0.0;
 	}
 

@@ -226,6 +226,7 @@ public class NodeDistanceCalculator {
 		ret = placeRatio * ret1 + (1.0 - placeRatio) * (ret2+ret3)*0.5;
 		
 		return ret;
+		//return 0.5;
 	}
 	
 	

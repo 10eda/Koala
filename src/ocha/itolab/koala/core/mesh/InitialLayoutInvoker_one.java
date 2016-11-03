@@ -31,7 +31,7 @@ public class InitialLayoutInvoker_one {
     public static void exec(Graph g, Mesh m) {
         graph = g;
         mesh = m;
-        constructEdge();
+        constructEdge_old();
  
         
         //writeEdgeFile();
@@ -170,13 +170,13 @@ public class InitialLayoutInvoker_one {
             if(count==1)
             	removeCtrlPt(i,i+num_v);
             else if(count>0)
-            	addEdge(i,i+num_v,countEdgeNum(i+num_v));
+            	addEdge(i,i+num_v,countEdgeWeight(i+num_v));
         	
-        	count = countEdgeNum(i+num_v);
+        	count = countEdgeNum(i+num_v*2);
             if(count==1)
             	removeCtrlPt(i,i+num_v*2);
             else if(count>0)
-            	addEdge(i,i+num_v*2,countEdgeNum(i+num_v*2));        	
+            	addEdge(i,i+num_v*2,countEdgeWeight(i+num_v*2));        	
         }
         
         
@@ -281,7 +281,6 @@ public class InitialLayoutInvoker_one {
     	int count=0;
         for(int i = 0; i < edgelist.size(); i++) {
             InputEdge ie = (InputEdge)edgelist.elementAt(i);
-            // 既存エッジが存在するなら、それに重みを加算する
             if(ie.node1 == id || ie.node2 == id) {
             	count++;
             }
