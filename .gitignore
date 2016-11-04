@@ -28,6 +28,9 @@ $RECYCLE.BIN/
 # Icon must ends with two \r.
 Icon
 
+#bin
+bin/
+
 #others
 .settings/
 .classpath
