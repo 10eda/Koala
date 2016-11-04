@@ -24,9 +24,17 @@ $RECYCLE.BIN/
 .DS_Store
 .AppleDouble
 .LSOverride
+src/
+.project
+.classpath
+.settings/
+.classpath
+.gitattributes
+test.csv
 
 # Icon must ends with two \r.
-Icon
+Icon
+
 
 # Thumbnails
 ._*
