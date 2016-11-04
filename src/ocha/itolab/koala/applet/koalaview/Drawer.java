@@ -215,6 +215,7 @@ public class Drawer implements GLEventListener {
 		calcMeshColor();
 	}
 
+
 	/**
 	 * マウスドラッグのモードを設定する
 	 * 
@@ -225,18 +226,25 @@ public class Drawer implements GLEventListener {
 		dragMode = newMode;
 	}
 
+
 	public void setColorSwitch(boolean[] st) {
 		colorSwitch = st;
 	}
 
-	// ViewingPanelを設定する
-	 
+
+	/**
+	 * ViewingPanelを設定する
+	 */
 	public void setViewingPanel(ViewingPanel v) {
 		vp = v;
 	}
 
+
+
+
 	void calcMeshColor() {
 		Mesh mesh = graph.mesh;
+
 
 		// for each vertex
 		for(int i = 0; i < mesh.getNumVertices(); i++) {
@@ -292,8 +300,9 @@ public class Drawer implements GLEventListener {
 		return z;
 	}
 
-	
-	//初期化
+	/**
+	 * 初期化
+	 */
 	public void init(GLAutoDrawable drawable) {
 
 		gl = drawable.getGL();
@@ -313,8 +322,9 @@ public class Drawer implements GLEventListener {
 
 	}
 
-	
-	//再描画
+	/**
+	 * 再描画
+	 */
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width,
 			int height) {
 
@@ -334,8 +344,9 @@ public class Drawer implements GLEventListener {
 
 	}
 
-	
-	//描画を実行する
+	/**
+	 * 描画を実行する
+	 */
 	public void display(GLAutoDrawable drawable) {
 
 		long mill1 = System.currentTimeMillis();
@@ -398,8 +409,11 @@ public class Drawer implements GLEventListener {
 		// System.out.println("  drawer.display() time=" + (mill2 - mill1));
 	}
 
-	
-	//背景色となるMeshを塗りつぶす
+
+
+	/**
+	 * 背景色となるMeshを塗りつぶす
+	 */
 	void paintMesh() {
 		if(graph == null) return;
 		if(graph.mesh == null) return;
@@ -429,42 +443,8 @@ public class Drawer implements GLEventListener {
 		}
 
 	}
-	
-	
-	//レイアウト用のノードの位置確認(テスト用)
-	void testDrawLayoutNodes(){
-		Mesh mesh = graph.mesh;
-		double SQUARE_SIZE = 0.01 / trans.getViewScaleX();
-		for (int i = 0; i < mesh.getNumVertices(); i++) {
-			Vertex v1 = mesh.getVertex(i);
-			if (v1.connectingPos[0] != 0 || v1.connectingPos[1] != 0) {
-				gl2.glColor3d(0, 0, 0);
-				drawOneBarWithHeight(v1.connectingPos[0], v1.connectingPos[1],
-						0, SQUARE_SIZE);
-				gl2.glBegin(GL2.GL_LINE_STRIP);
-				gl2.glColor3d(0, 0, 1);
-				gl2.glVertex3d(v1.getPosition()[0], v1.getPosition()[1], 0);
-				gl2.glColor3d(1, 0, 0);
-				gl2.glVertex3d(v1.connectingPos[0], v1.connectingPos[1], 0);
-				gl2.glEnd();
-			}
 
-			// connected
-			if (v1.connectedPos[0] != 0 || v1.connectedPos[1] != 0) {
-				gl2.glColor3d(0, 0, 0);
-				drawOneBarWithHeight(v1.connectedPos[0], v1.connectedPos[1], 0,
-						SQUARE_SIZE);
-				gl2.glBegin(GL2.GL_LINE_STRIP);
-				gl2.glColor3d(1, 0, 0);
-				gl2.glVertex3d(v1.getPosition()[0], v1.getPosition()[1], 0);
-				gl2.glColor3d(0, 0, 1);
-				gl2.glVertex3d(v1.connectedPos[0], v1.connectedPos[1], 0);
-				gl2.glEnd();
-			}
-		}	
-	}
 
-	
 	/**
 	 * Select edges to be drawn based on dissimilarity between two vertices 
 	 */	
@@ -483,9 +463,6 @@ public class Drawer implements GLEventListener {
 
 		// Draw bundled edges
 		gl2.glColor3d(0.7, 0.7, 0.7);
-		
-		//レイアウトテスト用
-		///testDrawLayoutNodes();
 
 		Mesh mesh = graph.mesh;
 		for(int i = 0; i < mesh.getNumVertices(); i++) {
@@ -493,6 +470,40 @@ public class Drawer implements GLEventListener {
 			ArrayList<Node> nodes1 = v1.getNodes();
 			double dissim[] = v1.getDissim();
 			double SQUARE_SIZE = 0.01 / trans.getViewScaleX();
+			
+			//テスト用
+			
+			/*
+			
+			//connecting
+			if(v1.connectingPos[0]!=0 || v1.connectingPos[1]!=0){
+				gl2.glColor3d(0,0,0);
+				drawOneBarWithHeight(v1.connectingPos[0], v1.connectingPos[1], 0, SQUARE_SIZE);
+				gl2.glBegin(GL2.GL_LINE_STRIP);
+				gl2.glColor3d(0,0,1);
+				gl2.glVertex3d(v1.getPosition()[0], v1.getPosition()[1], 0);
+				gl2.glColor3d(1,0,0);
+				gl2.glVertex3d(v1.connectingPos[0], v1.connectingPos[1], 0);
+				gl2.glEnd();
+			}
+			
+			//connected
+			if(v1.connectedPos[0]!=0 || v1.connectedPos[1]!=0){
+				gl2.glColor3d(0,0,0);
+				drawOneBarWithHeight(v1.connectedPos[0], v1.connectedPos[1], 0, SQUARE_SIZE);
+				gl2.glBegin(GL2.GL_LINE_STRIP);			
+				gl2.glColor3d(1,0,0);
+				gl2.glVertex3d(v1.getPosition()[0], v1.getPosition()[1], 0);
+				gl2.glColor3d(0,0,1);
+				gl2.glVertex3d(v1.connectedPos[0], v1.connectedPos[1], 0);
+				gl2.glEnd();
+			}
+			
+			*/
+			
+			
+			// テスト用おわり
+
 
 			for(int j = 0; j < mesh.getNumVertices(); j++) { //
 				if(dissim[j] > edgeDensityThreshold) continue;
@@ -508,9 +519,12 @@ public class Drawer implements GLEventListener {
 					angle = endBundle.getAngle()/Math.PI;
 				else
 					angle = startBundle.getAngle()/Math.PI;
+				//startBundle.getAngle()/Math.PI; //
+
+				//angle = startBundle.getAngle()/Math.PI;
+				//if(i>j) continue;
 
 				int rotation = mesh.getBundle(i,j).getRotation();
-				double rotate_angle = Math.min(startBundle.getCosine(), endBundle.getCosine());
 
 				/*startのBundleの中心*/
 				double startBundlePos[] = {0.0,0.0,0.0};
@@ -564,10 +578,10 @@ public class Drawer implements GLEventListener {
 						if(startBundlesList==null & endBundlesList==null){
 							if(rotation!=0){
 								count_interactive++;
-								drawRotateEdge(v1, v2, n1, n2,rotation,rotate_angle);
+								drawBundledEdges(v1, v2, n1, n2,rotation,angle); //合流しないけど双方向
 							}else{	
 								count_nocurve++;
-								drawOtherEdge(v1, v2, n1, n2); //合流しないし双方向じゃない
+								drawBundledEdges(v1, v2, n1, n2,0,angle); //合流しないし双方向じゃない
 							}
 						}else{
 							count_converge++;
@@ -591,7 +605,6 @@ public class Drawer implements GLEventListener {
 		
 	}
 
-	
 	/**
 	 * Select edges to be drawn based on degrees of nodes
 	 */
@@ -623,14 +636,16 @@ public class Drawer implements GLEventListener {
 						if(deg1 < mindeg && deg2 < mindeg) continue;
 						if(graph.isTwoNodeConnected(n1, n2) == false)
 							continue;
-						drawOtherEdge(v1, v2, n1, n2);
+						drawBundledEdges(v1, v2, n1, n2,0,0);	
 					}
 				}
 			}	
 		}
 	}
 
+
 	
+
 	double[] getMinBundle(Vertex v1,ArrayList<Integer> list){
 		double central[] = new double[3] ;
 		central[0] = central[1] = central[2] = 0;
@@ -676,7 +691,6 @@ public class Drawer implements GLEventListener {
 		
 		return vec1;
 	}
-	
 	
 	void drawPickedEdges() {
 		// Draw edges of the picked node
@@ -730,8 +744,349 @@ public class Drawer implements GLEventListener {
 		gl2.glLineWidth(1.0f);
 	}
 
-	
-	//合流ありのエッジ(たぶんほんとはこっち)
+	void drawBundledEdges(Vertex v1, Vertex v2, Node n1, Node n2,int rotation,Mesh mesh) {
+		int NUM_T = 10;
+		double ONE_THIRD = 0.33333333333;
+
+		int cid1 = n1.getColorId();
+		int cid2 = n1.getColorId();
+		if(colorSwitch != null 
+				&& cid1 >= 0 && colorSwitch[cid1] == false
+				&& cid2 >= 0 && colorSwitch[cid2] == false) {
+			return;
+		}
+
+
+		double p0[] = new double[2];
+		double p1[] = new double[2];
+		double p2[] = new double[2];
+		double p3[] = new double[2];
+		double v1pos[] = v1.getPosition();
+		double v2pos[] = v2.getPosition();
+
+		p0[0] = n1.getX();    p0[1] = n1.getY();
+		p3[0] = n2.getX();    p3[1] = n2.getY();
+
+		double z1 = calcZ(n1);
+		double z2 = calcZ(n2);
+
+		if(bundleShape > 0.5) { //中心を結ぶ線分上に制御点を決定
+			double ratio = (bundleShape + 0.5) * 2.0 * ONE_THIRD;
+			p1[0] = v1pos[0] * ratio + v2pos[0] * (1.0 - ratio);
+			p1[1] = v1pos[1] * ratio + v2pos[1] * (1.0 - ratio);
+			p2[0] = v2pos[0] * ratio + v1pos[0] * (1.0 - ratio);
+			p2[1] = v2pos[1] * ratio + v1pos[1] * (1.0 - ratio);
+		}
+		else { //三分割する点と三分割する点の線分上に制御点を決定
+			double ratio = bundleShape * 2.0;
+			p1[0] = (v1pos[0] * 2.0 + v2pos[0]) * ONE_THIRD * ratio
+					+ (p0[0] * 2.0 + p3[0]) * ONE_THIRD * (1.0 - ratio);
+			p1[1] = (v1pos[1] * 2.0 + v2pos[1]) * ONE_THIRD * ratio
+					+ (p0[1] * 2.0 + p3[1]) * ONE_THIRD * (1.0 - ratio);
+			p2[0] = (v2pos[0] * 2.0 + v1pos[0]) * ONE_THIRD * ratio
+					+ (p3[0] * 2.0 + p0[0]) * ONE_THIRD * (1.0 - ratio);
+			p2[1] = (v2pos[1] * 2.0 + v1pos[1]) * ONE_THIRD * ratio
+					+ (p3[1] * 2.0 + p0[1]) * ONE_THIRD * (1.0 - ratio);
+		}
+
+		//ここからmerge処理		
+		int id1 = v1.getId();
+		int id2 = v2.getId();
+		double cluster[] = new double[2]; //クラスタの中心
+		double dis[] = new double[2]; //クラスタとv1の差
+		double count=0;
+		cluster[0]=0;
+		cluster[1]=0;
+		ArrayList<Bundle> bundles = mesh.getBundles(id1);
+		double dissim[] = v1.getDissim();
+		int clusterNum=0;
+
+		/*とっとく
+		 //merge処理 : connected開始
+		clusterNum = bundles.get(id2).getVertsConnected();
+		if(clusterNum > 1)
+			//System.out.println(clusterNum);
+		if(clusterNum!=0){
+			for(int i =0;i<mesh.getNumVertices();i++){
+				if(i==id1)
+					continue;
+				Bundle bundle = bundles.get(i);
+				if(bundle.getVertsConnected()==clusterNum){
+					if(dissim[i] > edgeDensityThreshold)
+						continue;
+					count++;
+					cluster[0]+=mesh.getVertex(i).getPosition()[0];
+					cluster[1]+=mesh.getVertex(i).getPosition()[1];
+				}
+			}
+			cluster[0] = cluster[0]/count;
+			cluster[1] = cluster[1]/count;
+			dis[0] = (cluster[0] - p1[0]) * mergeStrength;
+			dis[1] = (cluster[1] - p1[1]) * mergeStrength;	
+			p1[0] = p1[0] + dis[0];
+			p1[1] = p1[1] + dis[1];
+		}
+		//merge処理 : connected終了
+		 */
+
+		//merge処理 : connected開始
+		clusterNum = bundles.get(id2).getVertsConnected();
+		if(v2.getOrder()!=null){
+			for(int i =0;i<v2.getOrder().size();i++){
+				Bundle bundle = v2.getOrder().get(i);
+				int n = bundle.getID1();
+				count++;
+				cluster[0]+=mesh.getVertex(n).getPosition()[0];
+				cluster[1]+=mesh.getVertex(n).getPosition()[1];
+			}
+			cluster[0] = cluster[0]/count;
+			cluster[1] = cluster[1]/count;
+			dis[0] = (cluster[0] - p1[0]) * mergeStrength;
+			dis[1] = (cluster[1] - p1[1]) * mergeStrength;	
+			p1[0] = p1[0] + dis[0];
+			p1[1] = p1[1] + dis[1];
+		}
+		//merge処理 : connected終了
+
+		//merge処理 : connecting開始
+		clusterNum = bundles.get(id2).getVertsConnecting();
+		if(clusterNum > 0)
+			//System.out.println(clusterNum);
+			if(clusterNum!=0){
+				for(int i =0;i<mesh.getNumVertices();i++){
+					if(i==id1)
+						continue;
+					Bundle bundle = bundles.get(i);
+					if(bundle.getVertsConnecting()==clusterNum){
+						if(dissim[i] > edgeDensityThreshold)
+							continue;
+						count++;
+						cluster[0]+=mesh.getVertex(i).getPosition()[0];
+						cluster[1]+=mesh.getVertex(i).getPosition()[1];
+					}
+				}
+				cluster[0] = cluster[0]/count;
+				cluster[1] = cluster[1]/count;
+				dis[0] = (cluster[0] - p2[0]) * mergeStrength;
+				dis[1] = (cluster[1] - p2[1]) * mergeStrength;	
+				p2[0] = p2[0] + dis[0];
+				p2[1] = p2[1] + dis[1];
+			}
+		//merge処理 : connecting終了
+
+		//merge処理終わり
+
+
+		//ここからrotation処理		
+		double disX = v2pos[0] - v1pos[0];
+		double disY = v2pos[1] - v1pos[1];
+		disX/=3;
+		disY/=3;
+
+		double para=rotationStrength;
+		p1[0] = p1[0] + rotation*para*disY;
+		p1[1] = p1[1] - rotation*para*disX;
+		p2[0] = p2[0] + rotation*para*disY;
+		p2[1] = p2[1] - rotation*para*disX;
+
+		//rotation処理終わり
+
+
+
+		double pt[] = new double[2];
+		gl2.glBegin(GL2.GL_LINE_STRIP);
+		for(int i = 0; i <= NUM_T; i++) {
+			double interval = 1.0 / (double)NUM_T;
+			double t0 = interval * (double)i;
+			double t1 = 1.0 - t0;
+
+			for(int j = 0; j < 2; j++) 
+				pt[j] = p0[j] * t1 * t1 * t1 + p1[j] * 3.0 * t0 * t1 * t1
+				+ p2[j] * 3.0 * t0 * t0 * t1 + p3[j] * t0 * t0 * t0;
+
+			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
+			double t = 0.25+t0/2.0;
+			gl2.glColor3d(t,0.5,1.0-t);
+			gl2.glVertex3d(pt[0], pt[1], z);
+
+		}
+		gl2.glEnd();
+
+	}
+
+
+	void drawBundledEdges(Vertex v1, Vertex v2, Node n1, Node n2,int rotation,Mesh mesh, ArrayList<Integer> startList,ArrayList<Integer> endList) {
+		int NUM_T = 10;
+		double ONE_THIRD = 0.33333333333;
+
+		int cid1 = n1.getColorId();
+		int cid2 = n1.getColorId();
+		if(colorSwitch != null 
+				&& cid1 >= 0 && colorSwitch[cid1] == false
+				&& cid2 >= 0 && colorSwitch[cid2] == false) {
+			return;
+		}
+
+
+		double p0[] = new double[2];
+		double p1[] = new double[2];
+		double p2[] = new double[2];
+		double p3[] = new double[2];
+		double v1pos[] = v1.getPosition();
+		double v2pos[] = v2.getPosition();
+
+		p0[0] = n1.getX();    p0[1] = n1.getY();
+		p3[0] = n2.getX();    p3[1] = n2.getY();
+
+		double z1 = calcZ(n1);
+		double z2 = calcZ(n2);
+
+		if(bundleShape > 0.5) { //中心を結ぶ線分上に制御点を決定
+			double ratio = (bundleShape + 0.5) * 2.0 * ONE_THIRD;
+			p1[0] = v1pos[0] * ratio + v2pos[0] * (1.0 - ratio);
+			p1[1] = v1pos[1] * ratio + v2pos[1] * (1.0 - ratio);
+			p2[0] = v2pos[0] * ratio + v1pos[0] * (1.0 - ratio);
+			p2[1] = v2pos[1] * ratio + v1pos[1] * (1.0 - ratio);
+		}
+		else { //三分割する点と三分割する点の線分上に制御点を決定
+			double ratio = bundleShape * 2.0;
+			p1[0] = (v1pos[0] * 2.0 + v2pos[0]) * ONE_THIRD * ratio
+					+ (p0[0] * 2.0 + p3[0]) * ONE_THIRD * (1.0 - ratio);
+			p1[1] = (v1pos[1] * 2.0 + v2pos[1]) * ONE_THIRD * ratio
+					+ (p0[1] * 2.0 + p3[1]) * ONE_THIRD * (1.0 - ratio);
+			p2[0] = (v2pos[0] * 2.0 + v1pos[0]) * ONE_THIRD * ratio
+					+ (p3[0] * 2.0 + p0[0]) * ONE_THIRD * (1.0 - ratio);
+			p2[1] = (v2pos[1] * 2.0 + v1pos[1]) * ONE_THIRD * ratio
+					+ (p3[1] * 2.0 + p0[1]) * ONE_THIRD * (1.0 - ratio);
+		}
+
+		//ここからmerge処理		
+		int id1 = v1.getId();
+		int id2 = v2.getId();
+		double cluster[] = new double[2]; //クラスタの中心
+		double dis[] = new double[2]; //クラスタとv1の差
+		double count=0;
+		cluster[0]=0;
+		cluster[1]=0;
+		ArrayList<Bundle> bundles = mesh.getBundles(id1);
+		double dissim[] = v1.getDissim();
+		int clusterNum=0;
+
+		/*とっとく
+		 //merge処理 : connected開始
+		clusterNum = bundles.get(id2).getVertsConnected();
+		if(clusterNum > 1)
+			//System.out.println(clusterNum);
+		if(clusterNum!=0){
+			for(int i =0;i<mesh.getNumVertices();i++){
+				if(i==id1)
+					continue;
+				Bundle bundle = bundles.get(i);
+				if(bundle.getVertsConnected()==clusterNum){
+					if(dissim[i] > edgeDensityThreshold)
+						continue;
+					count++;
+					cluster[0]+=mesh.getVertex(i).getPosition()[0];
+					cluster[1]+=mesh.getVertex(i).getPosition()[1];
+				}
+			}
+			cluster[0] = cluster[0]/count;
+			cluster[1] = cluster[1]/count;
+			dis[0] = (cluster[0] - p1[0]) * mergeStrength;
+			dis[1] = (cluster[1] - p1[1]) * mergeStrength;	
+			p1[0] = p1[0] + dis[0];
+			p1[1] = p1[1] + dis[1];
+		}
+		//merge処理 : connected終了
+		 */
+
+		//merge処理 : connected開始
+		clusterNum = bundles.get(id2).getVertsConnected();
+		if(v2.getOrder()!=null){
+			for(int i =0;i<v2.getOrder().size();i++){
+				Bundle bundle = v2.getOrder().get(i);
+				int n = bundle.getID1();
+				count++;
+				cluster[0]+=mesh.getVertex(n).getPosition()[0];
+				cluster[1]+=mesh.getVertex(n).getPosition()[1];
+			}
+			cluster[0] = cluster[0]/count;
+			cluster[1] = cluster[1]/count;
+			dis[0] = (cluster[0] - p1[0]) * mergeStrength;
+			dis[1] = (cluster[1] - p1[1]) * mergeStrength;	
+			p1[0] = p1[0] + dis[0];
+			p1[1] = p1[1] + dis[1];
+		}
+		//merge処理 : connected終了
+
+		//merge処理 : connecting開始
+		clusterNum = bundles.get(id2).getVertsConnecting();
+		if(clusterNum > 0)
+			//System.out.println(clusterNum);
+			if(clusterNum!=0){
+				for(int i =0;i<mesh.getNumVertices();i++){
+					if(i==id1)
+						continue;
+					Bundle bundle = bundles.get(i);
+					if(bundle.getVertsConnecting()==clusterNum){
+						if(dissim[i] > edgeDensityThreshold)
+							continue;
+						count++;
+						cluster[0]+=mesh.getVertex(i).getPosition()[0];
+						cluster[1]+=mesh.getVertex(i).getPosition()[1];
+					}
+				}
+				cluster[0] = cluster[0]/count;
+				cluster[1] = cluster[1]/count;
+				dis[0] = (cluster[0] - p2[0]) * mergeStrength;
+				dis[1] = (cluster[1] - p2[1]) * mergeStrength;	
+				p2[0] = p2[0] + dis[0];
+				p2[1] = p2[1] + dis[1];
+			}
+		//merge処理 : connecting終了
+
+		//merge処理終わり
+
+
+		//ここからrotation処理		
+		double disX = v2pos[0] - v1pos[0];
+		double disY = v2pos[1] - v1pos[1];
+		disX/=3;
+		disY/=3;
+
+		double para=rotationStrength;
+		p1[0] = p1[0] + rotation*para*disY;
+		p1[1] = p1[1] - rotation*para*disX;
+		p2[0] = p2[0] + rotation*para*disY;
+		p2[1] = p2[1] - rotation*para*disX;
+
+		//rotation処理終わり
+
+		//drawBezier(p0,p1,p2,p3,z1,z2,graph.mesh,v1,v2);
+
+		double pt[] = new double[2];
+		gl2.glBegin(GL2.GL_LINE_STRIP);
+		for(int i = 0; i <= NUM_T; i++) {
+			double interval = 1.0 / (double)NUM_T;
+			double t0 = interval * (double)i;
+			double t1 = 1.0 - t0;
+
+			for(int j = 0; j < 2; j++) 
+				pt[j] = p0[j] * t1 * t1 * t1 + p1[j] * 3.0 * t0 * t1 * t1
+				+ p2[j] * 3.0 * t0 * t0 * t1 + p3[j] * t0 * t0 * t0;
+
+			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
+			double t = 0.25+t0/2.0;
+			gl2.glColor3d(t,0.5,1.0-t);
+			gl2.glVertex3d(pt[0], pt[1], z);
+
+		}
+		gl2.glEnd();
+		
+
+	}
+
+
 	void drawBundledEdges(Vertex v1, Vertex v2, Node n1, Node n2,int rotation,Mesh mesh, double startBundlePos[],double endBundlePos[],double angle) {
 		int NUM_T = 10;
 		double ONE_THIRD = 0.33333333333;
@@ -825,9 +1180,7 @@ public class Drawer implements GLEventListener {
 		drawOneBarWithHeight(v1.getPosition()[0], v1.getPosition()[1], 0, 1000);
 
 	}
-	
-	
-	//合流ありのエッジ(なんか違いそう)
+
 	void drawBundledEdges_(Vertex v1, Vertex v2, Node n1, Node n2,int rotation,Mesh mesh, double startBundlePos[],double endBundlePos[],double angle) {
 		int NUM_T = 10;
 		double ONE_THIRD = 0.33333333333;
@@ -998,6 +1351,73 @@ public class Drawer implements GLEventListener {
 
 	}	
 	
+	void drawSpline(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh){
+		int NUM_T = 100;
+		double pt[] = new double[2];
+		gl2.glBegin(GL2.GL_LINE_STRIP);
+		
+		double p[][] = new double[8][2];
+		p[0][0] = p0[0];
+		p[0][1] = p0[1];
+		p[1][0] = p0[0];
+		p[1][1] = p0[1];
+		p[2][0] = p0[0];
+		p[2][1] = p0[1];
+
+		p[3][0] = p1[0];
+		p[3][1] = p1[1];
+		p[4][0] = p2[0];
+		p[4][1] = p2[1];
+
+		p[5][0] = p3[0];
+		p[5][1] = p3[1];
+		p[6][0] = p3[0];
+		p[6][1] = p3[1];
+		p[7][0] = p3[0];
+		p[7][1] = p3[1];
+		/*
+		p[1] = p0;
+		p[2] = p0;
+		p[3] = p1;
+		p[4] = p2;
+		p[5] = p3;
+		p[6] = p3;
+		p[7] = p3;
+		*/
+		
+		double interval = 6.0 / (double)NUM_T;
+		for(int i = 0; i <= NUM_T*5.0/6.0; i++) {
+			double t = interval * (double)i - 1.0;
+			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
+			//double col = 0.25+i/(NUM_T*2.0);
+			double col = (double)i*6.0/(NUM_T*5.0); 
+			gl2.glColor3d(col*0.6+0.4,0.4,1.0-col*0.6);
+			//gl2.glColor3d(col,0.5,1.0-col);
+			double x = 0;
+			double y = 0;
+			
+			for(int j=-2; j<6; j++){
+				x+=w(t-j)*p[j+2][0];
+				y+=w(t-j)*p[j+2][1];
+				//System.out.println(w(t-j)+","+p[j+2][0]+","+x+","+","+y);
+			}
+			//System.out.println(x+","+y);
+			gl2.glVertex3d(x, y, z);
+			
+			//System.out.println(interval*(double)NUM_T - 1.0);
+		}	
+		gl2.glEnd();
+	}
+	
+	double w(double t){
+		if(-1<=t && t<=1){
+			return (3.0*t*t*Math.abs(t) - 6.0*t*t +4)/6.0;
+		}else if(-2<=t && t<=2){
+			return ((Math.abs(t)-2)*(Math.abs(t)-2)*(Math.abs(t)-2))/(-6.0);
+		}else{
+			return 0.0;
+		}
+	}
 	
 	void drawBezier_avoiding(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh, Vertex v1, Vertex v2){
 		int NUM_T = 100;
@@ -1039,13 +1459,13 @@ public class Drawer implements GLEventListener {
 		gl2.glEnd();
 	}
 	
-	
 	//Bezier曲線の描画
 	//p0, p3 : 始点終点
 	//p1, p2 : 制御点
 	void drawBezier(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh){
 		int NUM_T = 10;
 		double pt[] = new double[2];
+		
 
 		gl2.glEnable(GL2.GL_BLEND);
 		gl2.glBlendFunc(GL2.GL_ZERO,  GL2.GL_SRC_COLOR);
@@ -1062,7 +1482,10 @@ public class Drawer implements GLEventListener {
 
 			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
 			double t = 0.25+t0/2.0;
+			//gl2.glColor3d(t0,0,1.0-t0);
 			gl2.glColor4d(t0*0.6+0.4,0.4,1.0-t0*0.6,0.8);
+			//gl2.glColor4d(0.25 + t0*0.5, 0.25 + t0*0.5,0.25 + t0*0.5 , 1.0-t0);
+			//gl2.glColor3d(angle/2,angle/2,angle/2);
 			int x = (int)((pt[0]+1)/2.0 * mesh.mapSize);
 			int y = (int)((pt[1]+1)/2.0 * mesh.mapSize);
 			
@@ -1072,68 +1495,9 @@ public class Drawer implements GLEventListener {
 		gl2.glDisable(GL2.GL_BLEND);
 	}
 	
-	
-	//Spline曲線の描画
-	//p0, p3 : 始点終点
-	//p1, p2 : 制御点
-	void drawSpline(double p0[], double p1[],double p2[],double p3[],double z1, double z2, Mesh mesh){
-		int NUM_T = 100;
-		double pt[] = new double[2];
-		gl2.glBegin(GL2.GL_LINE_STRIP);
-		
-		double p[][] = new double[8][2];
-		p[0][0] = p0[0];
-		p[0][1] = p0[1];
-		p[1][0] = p0[0];
-		p[1][1] = p0[1];
-		p[2][0] = p0[0];
-		p[2][1] = p0[1];
-
-		p[3][0] = p1[0];
-		p[3][1] = p1[1];
-		p[4][0] = p2[0];
-		p[4][1] = p2[1];
-
-		p[5][0] = p3[0];
-		p[5][1] = p3[1];
-		p[6][0] = p3[0];
-		p[6][1] = p3[1];
-		p[7][0] = p3[0];
-		p[7][1] = p3[1];
-		
-		double interval = 6.0 / (double)NUM_T;
-		for(int i = 0; i <= NUM_T*5.0/6.0; i++) {
-			double t = interval * (double)i - 1.0;
-			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
-			double col = (double)i*6.0/(NUM_T*5.0); 
-			gl2.glColor3d(col*0.6+0.4,0.4,1.0-col*0.6);
-			double x = 0;
-			double y = 0;
-			
-			for(int j=-2; j<6; j++){
-				x+=drawSpline_w(t-j)*p[j+2][0];
-				y+=drawSpline_w(t-j)*p[j+2][1];
-			}
-			gl2.glVertex3d(x, y, z);
-		}	
-		gl2.glEnd();
-	}
-	
-	
-	//drawSplineの補助関数
-	double drawSpline_w(double t){
-		if(-1<=t && t<=1){
-			return (3.0*t*t*Math.abs(t) - 6.0*t*t +4)/6.0;
-		}else if(-2<=t && t<=2){
-			return ((Math.abs(t)-2)*(Math.abs(t)-2)*(Math.abs(t)-2))/(-6.0);
-		}else{
-			return 0.0;
-		}
-	}
-	
-	
 	/*t0.1ごとに曲率半径を求める*/
-	void testKyokuritsu(double x1, double y1 ,double x2, double y2, double x3, double y3, double x4, double y4){
+	void Kyokuritsu(double x1, double y1 ,double x2, double y2, double x3, double y3, double x4, double y4){
+
 		for(double t = 0; t <= 1;t+=0.1){
 			double tp = 1-t;
 			double dx = 3*(t*t*(x4-x3)+2*t*tp*(x3-x2)+tp*tp*(x2-x1));
@@ -1143,11 +1507,9 @@ public class Drawer implements GLEventListener {
 			double kyokuritsu = Math.pow(dx*dx + dy*dy, 3.0/2.0) / (dx*ddy - dy*ddx);
 			System.out.println("kyokuritsu : "+kyokuritsu);
 		}
-	}	
-	
-	
-	//合流なし・一方向のエッジ
-	void drawOtherEdge(Vertex v1, Vertex v2, Node n1, Node n2) {
+	}
+
+	void drawBundledEdges(Vertex v1, Vertex v2, Node n1, Node n2,int rotation,double angle) {
 		int NUM_T = 10;
 		double ONE_THIRD = 0.33333333333;
 
@@ -1158,6 +1520,7 @@ public class Drawer implements GLEventListener {
 				&& cid2 >= 0 && colorSwitch[cid2] == false) {
 			return;
 		}
+
 
 		double p0[] = new double[2];
 		double p1[] = new double[2];
@@ -1191,58 +1554,51 @@ public class Drawer implements GLEventListener {
 					+ (p3[1] * 2.0 + p0[1]) * ONE_THIRD * (1.0 - ratio);
 		}
 
-		drawBezier(p0,p1,p2,p3,z1,z2,graph.mesh);
-	}	
-	
-	
-	//合流なし・双方向のエッジ描画
-	void drawRotateEdge(Vertex v1, Vertex v2, Node n1, Node n2,int rotation, double cosine) {
-		int cid1 = n1.getColorId();
-		int cid2 = n1.getColorId();
-		if(colorSwitch != null 
-				&& cid1 >= 0 && colorSwitch[cid1] == false
-				&& cid2 >= 0 && colorSwitch[cid2] == false) {
-			return;
-		}
+		//ここからrotation処理		
 
-
-		double p0[] = new double[2];
-		double p1[] = new double[2];
-		double p2[] = new double[2];
-		double p3[] = new double[2];
-		double v1pos[] = v1.getPosition();
-		double v2pos[] = v2.getPosition();
-
-		p0[0] = n1.getX();    p0[1] = n1.getY();
-		p3[0] = n2.getX();    p3[1] = n2.getY();
-
-		double z1 = calcZ(n1);
-		double z2 = calcZ(n2);
+		double disX = v2pos[0] - v1pos[0];
+		double disY = v2pos[1] - v1pos[1];
+		disX/=4;
+		disY/=4;
+		double para=rotationStrength;
+		p1[0] = p1[0] - rotation*para*disY;
+		p1[1] = p1[1] + rotation*para*disX;
+		p2[0] = p2[0] - rotation*para*disY;
+		p2[1] = p2[1] + rotation*para*disX;
 		
-		double vec[] = new double[2];
-		double sine = Math.sqrt(1-cosine*cosine) * rotation;
-	
-		//p1側
-		vec[0] = (v2pos[0] - v1pos[0])/3.0 * rotationStrength;
-		vec[1] = (v2pos[1] - v1pos[1])/3.0 * rotationStrength;
-		p1[0] = p0[0] + (vec[0]*cosine - vec[1]*sine);
-		p1[1] = p0[1] + (vec[0]*sine + vec[1]*cosine);
-		p1[0] = p1[0] + bundleShape*(v1pos[0] - p0[0]);
-		p1[1] = p1[1] + bundleShape*(v1pos[1] - p0[1]);
-		
-		//p2側
-		vec[0] = (v1pos[0] - v2pos[0])/3.0 * rotationStrength;
-		vec[1] = (v1pos[1] - v2pos[1])/3.0 * rotationStrength;
-		p2[0] = p3[0] + (vec[0]*cosine + vec[1]*sine);
-		p2[1] = p3[1] + (-vec[0]*sine + vec[1]*cosine);
-		p2[0] = p2[0] + bundleShape*(v2pos[0] - p3[0]);
-		p2[1] = p2[1] + bundleShape*(v2pos[1] - p3[1]);
 
 		drawBezier(p0,p1,p2,p3,z1,z2,graph.mesh);
 		//drawSpline(p0,p1,p2,p3,z1,z2,graph.mesh);
-	}
 
-	
+		/*
+		double pt[] = new double[2];
+		gl2.glBegin(GL2.GL_LINE_STRIP);
+		//gl2.glColor3d(0.3,0.7,0.3);
+
+		//gl2.glColor3d(angle/2,angle/2,angle/2);
+		for(int i = 0; i <= NUM_T; i++) {
+			double interval = 1.0 / (double)NUM_T;
+			double t0 = interval * (double)i;
+			double t1 = 1.0 - t0;
+
+			for(int j = 0; j < 2; j++) 
+				pt[j] = p0[j] * t1 * t1 * t1 + p1[j] * 3.0 * t0 * t1 * t1
+				+ p2[j] * 3.0 * t0 * t0 * t1 + p3[j] * t0 * t0 * t0;
+
+			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
+			double t = 0.25+t0/2.0;
+			gl2.glColor3d(t,0.5,1.0-t);
+			//gl2.glColor3d(angle/2,angle/2,angle/2);
+			gl2.glVertex3d(pt[0], pt[1], z);
+
+
+		}
+		gl2.glEnd();
+		*/
+		
+
+	}	
+
 	void drawNodes() {
 		if(graph == null) return;
 		float colf[] = new float[3];
@@ -1350,6 +1706,7 @@ public class Drawer implements GLEventListener {
 
 
 	void drawOneBarWithHeight(double x, double y, double z, double SQUARE_SIZE) {
+
 		gl2.glBegin(GL2.GL_POLYGON);
 		gl2.glVertex3d(x - SQUARE_SIZE, y + SQUARE_SIZE, z);
 		gl2.glVertex3d(x - SQUARE_SIZE, y - SQUARE_SIZE, z);
@@ -1404,14 +1761,15 @@ public class Drawer implements GLEventListener {
 		}
 
 		return (Object)pickedNode;
+
 	}
-	
+
 
 	void writeOneString(double x, double y, String word) {
 		gl2.glRasterPos3d(x, y, 0.01);
 		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_18, word);
 	}
-	
+
 
 	@Override
 	public void dispose(GLAutoDrawable arg0) {

@@ -184,14 +184,13 @@ public class Bundle {
 		return merge_connected;
 	}
 	
-	public void setCosine(double cosine){
-		cosine = cosine;
+	public void setLeftCosine(double cosine){
+		cosine_left = cosine;
 	}
 	
-	public double getCosine(){
-		return cosine;
+	public void setRightCosine(double cosine){
+		cosine_right = cosine;
 	}
-
 	
 }
 
