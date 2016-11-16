@@ -12,7 +12,7 @@ public class Mesh {
 	ArrayList triangles;
 	ArrayList<Vertex> vertices;
 	ArrayList<Vertex> verticesLarge;
-	ArrayList<ArrayList<Bundle>> bundles;
+	BundlesController bundles;
 	double minx, miny, maxx, maxy;
 	public double keyEmphasis = 0.0;	
 	public double rotationStrength = 0.5;
@@ -24,7 +24,7 @@ public class Mesh {
 		vertices = new ArrayList();
 		verticesLarge = new ArrayList();
 		triangles = new ArrayList();
-		bundles = new ArrayList<ArrayList<Bundle>>();
+		bundles = new BundlesController();
 		minx = miny = 1.0e+30;
 		maxx = maxy = -1.0e+30;
 	}
@@ -41,18 +41,6 @@ public class Mesh {
 		v.setId(verticesLarge.size());
 		verticesLarge.add(v);
 		return v;
-	}
-	
-	public void newBundles(){
-		bundles = new ArrayList<ArrayList<Bundle>>();
-		for(int i=0;i<this.getNumVertices();i++){
-			ArrayList list = new ArrayList();
-			for(int j=0;j<this.getNumVertices();j++){
-				Bundle b = new Bundle(i,j);
-				list.add(b);
-			}
-			bundles.add(list);
-		}
 	}
 
 	public void removeOneVertex(Vertex vertex) {
