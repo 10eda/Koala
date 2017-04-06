@@ -1062,7 +1062,8 @@ public class Drawer implements GLEventListener {
 
 			double z = (z1 * (NUM_T - i) + z2 * i) / (double)NUM_T;
 			double t = 0.25+t0/2.0;
-			gl2.glColor4d(t0*0.6+0.4,0.4,1.0-t0*0.6,0.8);
+			//gl2.glColor4d(t0*0.6+0.4,0.4,1.0-t0*0.6,0.8);
+			gl2.glColor3d(t*0.6+0.4,0.4,1.0-t*0.6);
 			int x = (int)((pt[0]+1)/2.0 * mesh.mapSize);
 			int y = (int)((pt[1]+1)/2.0 * mesh.mapSize);
 			
